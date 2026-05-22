@@ -1,6 +1,6 @@
 // app/layout.tsx
 "use client"; // Many Material Tailwind components need client-side rendering
-import Navbar from "@/components/navigation/seller-navbar";
+import Navbar from "@/components/navigation/seller/seller-navbar";
 import "./../globals.css";
 import { ThemeProvider } from "@material-tailwind/react";
 import Footer from '../../components/common/footer';

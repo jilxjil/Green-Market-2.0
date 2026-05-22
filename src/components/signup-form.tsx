@@ -241,7 +241,7 @@ router.replace("/dashboard")
 
               <FieldDescription className="text-center">
                 Already have an account?{" "}
-                <a href="#">Sign in</a>
+                <a href="/login">Sign in</a>
               </FieldDescription>
             </Field>
           </FieldGroup>

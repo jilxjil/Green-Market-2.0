@@ -2,14 +2,14 @@ import Link from "next/link";
 
 
 import { ShoppingCart } from "lucide-react";
-import Logo from "./shared/logo";
-import Notifications from "./shared/notifications";
-import UserMenu from "./shared/user-menu";
+import Logo from "../shared/logo";
+import Notifications from "../shared/notifications";
+import UserMenu from "../shared/user-menu";
 import DesktopNav from "./desktop-nav";
-import MobileNav from "./mobile-nav";
+import MobileNav from "../mobile-nav";
 import SearchBar from "./search-bar";
 
-export default function Navbar() {
+export default function MarketplaceNavbar() {
   return (
     <>
       <header className="sticky top-0 z-40 border-b bg-background/80 backdrop-blur">
