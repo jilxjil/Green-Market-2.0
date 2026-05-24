@@ -3,43 +3,7 @@
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 
-import {
-  LayoutDashboard,
-  Package,
-  ShoppingCart,
-  BarChart3,
-  MessageSquare,
-  User,
-  Settings,
-} from "lucide-react"
-
-const links = [
-  {
-    label: "Overview",
-    href: "/dashboard/seller",
-    icon: LayoutDashboard,
-  },
-  {
-    label: "Products",
-    href: "/dashboard/seller/products",
-    icon: Package,
-  },
-  {
-    label: "Orders",
-    href: "/dashboard/seller/orders",
-    icon: ShoppingCart,
-  },
-  {
-    label: "Analytics",
-    href: "/dashboard/seller/analytics",
-    icon: BarChart3,
-  },
-  {
-    label: "Messages",
-    href: "/dashboard/seller/messages",
-    icon: MessageSquare,
-  },
-]
+import { isNavLinkActive, sellerLinks } from "../nav-links"
 
 export default function SellerSidebar() {
     const pathname = usePathname();
@@ -57,9 +21,9 @@ export default function SellerSidebar() {
             </div>
 
             <nav className="flex-1 space-y-2 p-4">
-                {links.map((link) => {
+                {sellerLinks.map((link) => {
                     const Icon = link.icon
-                    const active = pathname === link.href
+                    const active = isNavLinkActive(pathname, link.href, link.exact)
 
                     return (
                         <Link 
@@ -70,7 +34,7 @@ export default function SellerSidebar() {
                                 ? "bg-green-100 text-green-700 font-medium"
                                 : "text-muted-foreground hover:bg-muted"}`}
                         >
-                            <Icon className="h-5 w-5"/>
+                            {Icon && <Icon className="h-5 w-5"/>}
                             {link.label}
                         </Link>        
                     )

@@ -1,6 +1,3 @@
-import Link from "next/link";
-
-
 import { ShoppingCart } from "lucide-react";
 import Logo from "../shared/logo";
 import Notifications from "../shared/notifications";
@@ -17,9 +14,7 @@ export default function MarketplaceNavbar() {
 
           {/* Single unified row: Logo | Nav | ─spacer─ | Actions */}
           <div className="flex items-center gap-4 py-3">
-            <Link href="/">
-              <Logo />
-            </Link>
+            <Logo />
 
             <div className="hidden h-5 w-px bg-border md:block" />
 

@@ -2,43 +2,23 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import {Button} from "@/components/ui/button";
-import { redirect } from "next/navigation";
-
-interface NavLink {
-  label: string;
-  href: string;
-}
-
-const navLinks: NavLink[] = [
-  {
-    label: "Home",
-    href: "/",
-  },
-  {
-    label: "About",
-    href: "/about",
-  },
-  {
-    label: "Services",
-    href: "/services",
-  },
-  {
-    label: "Contact",
-    href: "/contact",
-  },
-];
+import { cn } from "@/lib/utils";
+import Logo from "@/components/navigation/shared/logo";
+import { isNavLinkActive, publicLinks } from "@/components/navigation/nav-links";
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
+  const pathname = usePathname();
 
   return (
     <nav
       className="
-        fixed start-0 top-0 z-20
+        sticky start-0 top-0 z-20
         w-full border-b border-default
-        bg-white/70 backdrop-blur
+        bg-background/80 backdrop-blur
       "
     >
       <div
@@ -49,29 +29,7 @@ export default function Navbar() {
         "
       >
         {/* Logo */}
-        <Link
-          href="/"
-          className="
-            flex items-center
-            space-x-3 rtl:space-x-reverse
-          "
-        >
-          <img
-            src="https://flowbite.com/docs/images/logo.svg"
-            className="h-7"
-            alt="Flowbite Logo"
-          />
-
-          <span
-            className="
-              self-center whitespace-nowrap
-              text-xl font-semibold
-              text-heading
-            "
-          >
-            Flowbite
-          </span>
-        </Link>
+        <Logo />
 
         {/* Right Actions */}
         <div
@@ -82,7 +40,7 @@ export default function Navbar() {
           "
         >
           <Button
-            onClick={() => redirect("/register")}
+            asChild
             type="button"
             className="
               max-sm:hidden
@@ -98,7 +56,7 @@ export default function Navbar() {
               focus:ring-brand-medium
             "
           >
-            Get started
+            <Link href="/register">Get started</Link>
           </Button>
 
           {/* Mobile Menu Button */}
@@ -158,33 +116,25 @@ export default function Navbar() {
               md:bg-neutral-primary
             "
           >
-            {navLinks.map((link, index) => (
+            {publicLinks.map((link) => {
+              const active = isNavLinkActive(pathname, link.href, link.exact);
+
+              return (
               <li key={link.href}>
                 <Link
                   href={link.href}
-                  className={`
-                    block rounded-full px-4 py-1
-                    ${
-                      index === 0
-                        ? `
-                          bg-green-accent text-white
-                          
-                          md:bg-green-accent
-                          md:text-green-900
-                        `
-                        : `
-                          text-heading
-                          hover:bg-neutral-tertiary
-                          md:hover:bg-transparent
-                          md:hover:text-primary
-                        `
-                    }
-                  `}
+                  className={cn(
+                    "block rounded-full px-4 py-1 text-sm transition-colors",
+                    active
+                      ? "bg-green-accent text-green-900"
+                      : "text-heading hover:bg-neutral-tertiary md:hover:bg-transparent md:hover:text-primary"
+                  )}
                 >
                   {link.label}
                 </Link>
               </li>
-            ))}
+              );
+            })}
           </ul>
         </div>
       </div>

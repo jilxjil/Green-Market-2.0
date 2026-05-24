@@ -2,43 +2,8 @@
 
 import { usePathname } from "next/navigation";
 
-import {
-  Home,
-  ShoppingCart,
-  LayoutDashboard,
-  Package,
-  User,
-} from "lucide-react";
-
 import NavItem from "./nav-item";
-
-const navItems = [
-  {
-    label: "Home",
-    href: "/",
-    icon: Home,
-  },
-  {
-    label: "Cart",
-    href: "/cart",
-    icon: ShoppingCart,
-  },
-  {
-    label: "Dashboard",
-    href: "/dashboard",
-    icon: LayoutDashboard,
-  },
-  {
-    label: "Orders",
-    href: "/orders",
-    icon: Package,
-  },
-  {
-    label: "Account",
-    href: "/account",
-    icon: User,
-  },
-];
+import { isNavLinkActive, mobileMarketplaceLinks } from "./nav-links";
 
 export default function MobileNav() {
   const pathname = usePathname();
@@ -58,14 +23,16 @@ export default function MobileNav() {
         md:hidden
       "
     >
-      {navItems.map((item) => (
-        <NavItem
-          key={item.href}
-          href={item.href}
-          label={item.label}
-          icon={item.icon}
-          active={pathname === item.href}
-        />
+      {mobileMarketplaceLinks.map((item) => (
+        item.icon && (
+          <NavItem
+            key={item.href}
+            href={item.href}
+            label={item.label}
+            icon={item.icon}
+            active={isNavLinkActive(pathname, item.href, item.exact)}
+          />
+        )
       ))}
     </nav>
   );
