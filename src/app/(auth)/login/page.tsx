@@ -25,7 +25,7 @@ export default function LoginPage() {
         <div className="bg-[url('/landscapeView.jpeg')] absolute inset-0 h-full w-full bg-cover bg-center dark:brightness-[0.2] dark:grayscale">
           <p className="text-6xl text-green-50 font-alan font-semibold mt-10 text-center">Green Market</p>
           <div className="flex flex-col mt-60 px-8 w-[90%] items-center justify-center text-center">
-            <p className= "text-6xl w-[80%] text-justify-center items-center text-green-50 font-alan font-semibold space-y-4 )">"Creativity  is  Intelligence  having  fun"</p>
+            <p className= "text-6xl w-[80%] text-justify-center items-center text-green-50 font-alan font-semibold space-y-4 )">&quot;Creativity is intelligence having fun&quot;</p>
             <p className="mt-6 text-lg font-medium text-green-50">- Albert Einstein</p>
           </div>
         </div>

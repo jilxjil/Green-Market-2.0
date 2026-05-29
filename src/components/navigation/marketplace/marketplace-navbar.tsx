@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
 import Logo from "../shared/logo";
 import Notifications from "../shared/notifications";
@@ -24,8 +25,10 @@ export default function MarketplaceNavbar() {
 
             <div className="flex items-center gap-4">
               <Notifications />
-                <ShoppingCart className="h-5 w-5 cursor-pointer text-muted-foreground hover:text-foreground" />
-                <UserMenu />    
+              <Link href="/cart" aria-label="Cart">
+                <ShoppingCart className="h-5 w-5 text-muted-foreground hover:text-foreground" />
+              </Link>
+              <UserMenu />
             </div>
           </div>
 

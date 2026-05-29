@@ -1,33 +1,30 @@
 import { NextResponse } from "next/server"
-import { headers } from "next/headers"
 
-import { auth } from "@/lib/auth/auth"
 import { db } from "@/db"
 
 import { products } from "@/db/schema"
 
-import { eq, desc } from "drizzle-orm"
+import { eq } from "drizzle-orm"
 
-export async function GET() {
+export async function GET(
+  _req: Request,
+  { params }: { params: Promise<{ productId: string }> }
+) {
   try {
-    const session = await auth.api.getSession({
-      headers: await headers(),
+    const { productId } = await params
+
+    const product = await db.query.products.findFirst({
+      where: eq(products.id, productId),
     })
 
-    if (!session?.user) {
+    if (!product) {
       return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
+        { error: "Not found" },
+        { status: 404 }
       )
     }
 
-    const sellerProducts = await db
-      .select()
-      .from(products)
-      .where(eq(products.sellerId, session.user.id))
-      .orderBy(desc(products.createdAt))
-
-    return NextResponse.json(sellerProducts)
+    return NextResponse.json(product)
 
   } catch (error) {
     console.error(error)

@@ -1,10 +1,10 @@
-import { drizzle } from "drizzle-orm/node-postgres"
+import { drizzle, NodePgDatabase } from "drizzle-orm/node-postgres"
 import { Pool } from "pg"
 import * as schema from "./schema"
 
 const globalForDb = globalThis as unknown as {
   pool: Pool | undefined
-  db: ReturnType<typeof drizzle> | undefined
+  db: NodePgDatabase<typeof schema> | undefined
 }
 
 const pool =

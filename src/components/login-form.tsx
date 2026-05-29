@@ -4,6 +4,7 @@ import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth/auth-client";
+import { loginSchema } from "@/lib/validations/auth";
 
 import {
   Field,
@@ -30,32 +31,29 @@ export function LoginForm({
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
 
-    try{
-      const response = await fetch("/api/auth/signin",{
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),    
-
-      })
-      const data = await response.json()
-
-      if (!response.ok){
-        alert(data.message)
-        return  
-      }
-      console.log("logged In :" ,data )
-    } catch (error) {
-      console.error(error)
+    const parseResult = loginSchema.safeParse(formData);
+    if (!parseResult.success) {
+      alert(parseResult.error.message);
+      return;
     }
-    const res = await authClient.signIn.email({
-      email: formData.email,
-      password: formData.password,
-    });
 
-    if (res?.data) {
-      router.replace("/dashboard");
+    try {
+      const res = await authClient.signIn.email({
+        email: formData.email,
+        password: formData.password,
+      });
+
+      if (res?.error) {
+        alert(res.error.message);
+        return;
+      }
+
+      if (res?.data) {
+        router.replace("/dashboard");
+      }
+    } catch (error) {
+      console.error(error);
+      alert("An unexpected error occurred.");
     }
   }  
 

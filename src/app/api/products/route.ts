@@ -1,11 +1,20 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
-import { eq } from "drizzle-orm";
+import { desc, eq } from "drizzle-orm";
 
 import { auth } from "@/lib/auth/auth";
 import { db } from "@/db";
 
 import { products, profiles } from "@/db/schema";
+
+export async function GET() {
+  const allProducts = await db
+    .select()
+    .from(products)
+    .orderBy(desc(products.createdAt));
+
+  return NextResponse.json(allProducts);
+}
 
 export async function POST(req: Request) {
   try {
@@ -21,17 +30,16 @@ export async function POST(req: Request) {
       );
     }
 
-    // // 2. ROLE CHECK
-    // const profile = await db.query.profiles.findFirst({
-    //   where: eq(profiles.userId, session.user.id),
-    // });
+    const profile = await db.query.profiles.findFirst({
+      where: eq(profiles.userId, session.user.id),
+    });
 
-    // if (!profile || profile.role !== "seller") {
-    //   return NextResponse.json(
-    //     { error: "Only sellers can create products" },
-    //     { status: 403 }
-    //   );
-    // }
+    if (!profile || profile.role !== "seller") {
+      return NextResponse.json(
+        { error: "Only sellers can create products" },
+        { status: 403 }
+      );
+    }
 
     // 3. REQUEST BODY
     const body = await req.json();
@@ -46,7 +54,7 @@ export async function POST(req: Request) {
     } = body;
 
     // 4. VALIDATION (minimal MVP level)
-    if (!title || !price) {
+    if (!title || Number(price) <= 0) {
       return NextResponse.json(
         { error: "Title and price are required" },
         { status: 400 }

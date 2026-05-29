@@ -1,16 +1,19 @@
 
-
-
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { db } from "@/db";
 import { FaBalanceScale, FaShoePrints, FaSeedling,FaCheck } from "react-icons/fa";
 
 import { products } from "@/db/schema";
+import { desc } from "drizzle-orm";
 
 
 export default async function BuyerDashboard() {
 
-  const allProducts = await db.select().from(products);
+  const allProducts = await db
+    .select()
+    .from(products)
+    .orderBy(desc(products.createdAt));
 
 
 
@@ -87,21 +90,67 @@ export default async function BuyerDashboard() {
     </div>
 
   </div>
-  <section>
-    {allProducts.map((product) => (
-      <div key={product.id}>
-        <h2>{product.title}</h2>
-        <p>{product.price}</p>
-      </div>
-    ))}
-  </section>
-  
-
-      
-
-     
     </div>
+
+    <section className="mx-auto max-w-7xl px-4 py-10 md:px-6 lg:px-8">
+      <div className="mb-6 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">
+            Fresh from the marketplace
+          </h2>
+          <p className="text-muted-foreground">
+            Browse produce listed by Green Market sellers.
+          </p>
+        </div>
+      </div>
+
+      {allProducts.length === 0 ? (
+        <div className="rounded-lg border bg-card p-8 text-center text-muted-foreground">
+          No products are listed yet.
+        </div>
+      ) : (
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {allProducts.map((product) => (
+            <Link
+              key={product.id}
+              href={`/marketplace/${product.id}`}
+              className="group overflow-hidden rounded-lg border bg-card transition hover:-translate-y-0.5 hover:shadow-md"
+            >
+              {product.imageUrl ? (
+                <img
+                  src={product.imageUrl}
+                  alt={product.title}
+                  className="aspect-[4/3] w-full object-cover transition group-hover:scale-[1.02]"
+                />
+              ) : (
+                <div className="flex aspect-[4/3] w-full items-center justify-center bg-green-accent/30 text-lg font-semibold text-primary">
+                  Green Market
+                </div>
+              )}
+
+              <div className="space-y-2 p-4">
+                <div className="flex items-start justify-between gap-3">
+                  <h3 className="font-semibold text-foreground">
+                    {product.title}
+                  </h3>
+                  <p className="shrink-0 font-bold">
+                    GH₵ {product.price}
+                  </p>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  {product.category || "Fresh produce"}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {(product.stockQuantity ?? 0) > 0
+                    ? `${product.stockQuantity} available`
+                    : "Out of stock"}
+                </p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
+    </section>
    </main>
   );
 }
-

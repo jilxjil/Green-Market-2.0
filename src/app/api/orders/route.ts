@@ -1,0 +1,138 @@
+import { NextResponse } from "next/server";
+import { eq, inArray } from "drizzle-orm";
+
+import { db } from "@/db";
+import { getCurrentUser } from "@/lib/auth/get-current-user";
+import { orderItems, orders, products, profiles } from "@/db/schema";
+
+interface OrderRequestItem {
+  productId: string;
+  quantity: number;
+}
+
+function normalizeItems(items: unknown): OrderRequestItem[] {
+  if (!Array.isArray(items)) {
+    return [];
+  }
+
+  return items
+    .map((item) => {
+      if (
+        !item ||
+        typeof item !== "object" ||
+        !("productId" in item) ||
+        !("quantity" in item)
+      ) {
+        return null;
+      }
+
+      return {
+        productId: String(item.productId),
+        quantity: Number(item.quantity),
+      };
+    })
+    .filter(
+      (item): item is OrderRequestItem =>
+        !!item && item.productId.length > 0 && Number.isInteger(item.quantity)
+    );
+}
+
+export async function POST(req: Request) {
+  const user = await getCurrentUser();
+
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const profile = await db.query.profiles.findFirst({
+    where: eq(profiles.userId, user.id),
+  });
+
+  if (!profile || profile.role !== "buyer") {
+    return NextResponse.json(
+      { error: "Only buyers can place orders" },
+      { status: 403 }
+    );
+  }
+
+  const body = await req.json().catch(() => null);
+  const items = normalizeItems(body?.items);
+
+  if (items.length === 0) {
+    return NextResponse.json(
+      { error: "Cart is empty" },
+      { status: 400 }
+    );
+  }
+
+  const productIds = [...new Set(items.map((item) => item.productId))];
+  const dbProducts = await db
+    .select()
+    .from(products)
+    .where(inArray(products.id, productIds));
+
+  if (dbProducts.length !== productIds.length) {
+    return NextResponse.json(
+      { error: "One or more products are no longer available" },
+      { status: 400 }
+    );
+  }
+
+  const productsById = new Map(
+    dbProducts.map((product) => [product.id, product])
+  );
+
+  const checkoutItems = items.map((item) => {
+    const product = productsById.get(item.productId);
+    const stockQuantity = product?.stockQuantity ?? 0;
+
+    if (!product || item.quantity < 1 || item.quantity > stockQuantity) {
+      return null;
+    }
+
+    return {
+      product,
+      quantity: item.quantity,
+      lineTotal: product.price * item.quantity,
+    };
+  });
+
+  if (checkoutItems.some((item) => item === null)) {
+    return NextResponse.json(
+      { error: "One or more cart quantities exceed available stock" },
+      { status: 400 }
+    );
+  }
+
+  const validItems = checkoutItems.filter(
+    (item): item is NonNullable<(typeof checkoutItems)[number]> => item !== null
+  );
+  const total = validItems.reduce((sum, item) => sum + item.lineTotal, 0);
+
+  const order = await db.transaction(async (tx) => {
+    const [createdOrder] = await tx
+      .insert(orders)
+      .values({
+        buyerId: profile.id,
+        totalAmount: total.toString(),
+        status: "pending",
+      })
+      .returning({ id: orders.id });
+
+    await tx.insert(orderItems).values(
+      validItems.map((item) => ({
+        orderId: createdOrder.id,
+        productId: item.product.id,
+        quantity: item.quantity,
+        priceAtPurchase: item.product.price.toString(),
+      }))
+    );
+
+    return createdOrder;
+  });
+
+  return NextResponse.json({
+    success: true,
+    orderId: order.id,
+  });
+}

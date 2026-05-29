@@ -4,7 +4,6 @@ import {
   Package,
   ShoppingCart,
   Store,
-  User,
   type LucideIcon,
 } from "lucide-react"
 
@@ -36,6 +35,10 @@ export const marketplaceLinks: NavigationLink[] = [
     href: "/marketplace",
   },
   {
+    label: "Cart",
+    href: "/cart",
+  },
+  {
     label: "Dashboard",
     href: "/dashboard",
   },
@@ -62,11 +65,6 @@ export const mobileMarketplaceLinks: NavigationLink[] = [
     href: "/dashboard",
     icon: LayoutDashboard,
   },
-  {
-    label: "Account",
-    href: "/account",
-    icon: User,
-  },
 ]
 
 export const sellerLinks: NavigationLink[] = [
@@ -80,11 +78,6 @@ export const sellerLinks: NavigationLink[] = [
     label: "Products",
     href: "/dashboard/seller/products",
     icon: Package,
-  },
-  {
-    label: "Orders",
-    href: "/dashboard/seller/orders",
-    icon: ShoppingCart,
   },
 ]
 

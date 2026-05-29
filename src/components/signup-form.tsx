@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth/auth-client";
+import { registerSchema } from "@/lib/validations/auth";
 
 import { Button } from "@/components/ui/button"
 import {
@@ -57,9 +58,17 @@ export function SignupForm({
       alert("Passwords do not match")
       return
     }
-    if (!formData.role) {
-      alert("Please select a role")
-      return
+
+    const parseResult = registerSchema.safeParse({
+      name: formData.name,
+      email: formData.email,
+      password: formData.password,
+      role: formData.role || "buyer"
+    });
+
+    if (!parseResult.success) {
+      alert(parseResult.error.message);
+      return;
     }
 
     try{
@@ -74,23 +83,6 @@ if (res.error) {
   return
 }
 
-if (res.data?.user) {
-  const profileRes = await fetch("/api/profile/create", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      userId: res.data.user.id,
-      role: formData.role,
-    }),
-  })
-
-  if (!profileRes.ok) {
-    alert("Profile creation failed")
-    return
-  }
-}
 console.log(res.data)
 router.replace("/dashboard")
     } catch (error) {
@@ -153,36 +145,7 @@ router.replace("/dashboard")
               </FieldDescription>
             </Field>
 
-            <Field>
-              <FieldLabel>Account Type</FieldLabel>
 
-              <Select
-                value={formData.role}
-                onValueChange={(value) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    role: value,
-                  }))
-                }
-              >
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select account type" />
-                </SelectTrigger>
-
-                <SelectContent>
-                  <SelectGroup>
-                    {items.map((item) => (
-                      <SelectItem
-                        key={item.value}
-                        value={item.value}
-                      >
-                        {item.label}
-                      </SelectItem>
-                    ))}
-                  </SelectGroup>
-                </SelectContent>
-              </Select>
-            </Field>
 
             <Field>
               <FieldLabel htmlFor="password">
