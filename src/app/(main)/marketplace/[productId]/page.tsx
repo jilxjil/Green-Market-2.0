@@ -72,6 +72,12 @@ export default async function ProductDetailPage({
               {verificationStatus}
             </p>
           )}
+          <Link
+            href={`/sellers/${product.sellerId}`}
+            className="mt-4 inline-flex text-sm font-medium text-primary hover:underline"
+          >
+            View all from this seller
+          </Link>
         </div>
 
         {product.description && (

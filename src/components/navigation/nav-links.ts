@@ -120,6 +120,26 @@ export const expertLinks: NavigationLink[] = [
   },
 ]
 
+export const buyerLinks: NavigationLink[] = [
+  {
+    label: "Overview",
+    href: "/dashboard/buyer",
+    exact: true,
+  },
+  {
+    label: "Profile",
+    href: "/dashboard/buyer/profile",
+  },
+  {
+    label: "Marketplace",
+    href: "/marketplace",
+  },
+  {
+    label: "Experts",
+    href: "/experts",
+  },
+]
+
 export function isNavLinkActive(pathname: string, href: string, exact = false) {
   if (href === "/" || exact) {
     return pathname === href

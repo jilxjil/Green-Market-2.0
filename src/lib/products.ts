@@ -1,4 +1,4 @@
-import { and, desc, eq, ilike, ne, or, sql } from "drizzle-orm";
+import { and, desc, eq, ilike, or, sql } from "drizzle-orm";
 
 import { db } from "@/db";
 import { products, sellerProfiles, user } from "@/db/schema";
@@ -17,7 +17,7 @@ interface MarketplaceFilters {
 }
 
 export async function getPublicProducts(filters: MarketplaceFilters = {}) {
-  const conditions = [ne(products.status, "archived")];
+  const conditions = [eq(products.status, "active")];
 
   if (filters.category) {
     conditions.push(eq(products.category, filters.category));
@@ -41,7 +41,7 @@ export async function getMarketplaceCategories() {
   const rows = await db
     .selectDistinct({ category: products.category })
     .from(products)
-    .where(and(ne(products.status, "archived"), sql`${products.category} IS NOT NULL`))
+    .where(and(eq(products.status, "active"), sql`${products.category} IS NOT NULL`))
     .orderBy(products.category);
 
   return rows

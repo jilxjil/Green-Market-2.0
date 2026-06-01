@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import CancelOrderButton from "@/components/orders/cancel-order-button";
 import { Button } from "@/components/ui/button";
 import { getRequesterConsultationRequests } from "@/lib/consultation-requests-db";
 import { getBuyerOrders } from "@/lib/orders";
@@ -13,7 +14,7 @@ export default async function BuyerDashboard() {
   ]);
 
   return (
-    <main className="mx-auto max-w-6xl space-y-10 px-4 py-8">
+    <div className="mx-auto w-full max-w-6xl space-y-10">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Buyer Dashboard</h1>
@@ -82,6 +83,10 @@ export default async function BuyerDashboard() {
                   </div>
                 ))}
               </div>
+
+              <div className="mt-5 border-t pt-4">
+                <CancelOrderButton orderId={order.id} status={order.status} />
+              </div>
             </article>
           ))
         )}
@@ -129,6 +134,6 @@ export default async function BuyerDashboard() {
           ))
         )}
       </section>
-    </main>
+    </div>
   );
 }

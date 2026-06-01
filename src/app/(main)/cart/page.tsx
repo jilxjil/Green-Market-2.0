@@ -149,6 +149,9 @@ export default function CartPage() {
           <span className="text-muted-foreground">Subtotal</span>
           <span className="text-2xl font-bold">GH₵ {subtotal}</span>
         </div>
+        <p className="mt-4 text-sm text-muted-foreground">
+          No online payment yet. Seller will confirm your order.
+        </p>
         {error && <p className="mt-4 text-sm text-destructive">{error}</p>}
         <Button
           className="mt-5 h-11 w-full"

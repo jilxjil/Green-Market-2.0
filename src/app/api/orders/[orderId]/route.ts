@@ -8,7 +8,7 @@ import {
 } from "@/lib/orders";
 import { db } from "@/db";
 import { getCurrentUser } from "@/lib/auth/get-current-user";
-import { profiles } from "@/db/schema";
+import { orders, profiles } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 export async function PATCH(
@@ -26,9 +26,9 @@ export async function PATCH(
     where: eq(profiles.userId, user.id),
   });
 
-  if (!profile || profile.role !== "seller") {
+  if (!profile || (profile.role !== "seller" && profile.role !== "buyer")) {
     return NextResponse.json(
-      { error: "Only sellers can update orders" },
+      { error: "Forbidden" },
       { status: 403 }
     );
   }
@@ -43,13 +43,46 @@ export async function PATCH(
     );
   }
 
+  if (profile.role === "buyer") {
+    if (status !== "cancelled") {
+      return NextResponse.json(
+        { error: "Only cancellations are allowed for buyers" },
+        { status: 403 }
+      );
+    }
+
+    const order = await db.query.orders.findFirst({
+      where: eq(orders.id, orderId),
+    });
+
+    if (!order) {
+      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    }
+
+    if (order.buyerId !== profile.id) {
+      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    }
+
+    if (!canTransitionOrderStatus(order.status, status)) {
+      return NextResponse.json(
+        { error: "Invalid status transition" },
+        { status: 400 }
+      );
+    }
+
+    const updatedOrder = await updateOrderStatus(orderId, status);
+
+    return NextResponse.json({
+      success: true,
+      orderId: updatedOrder.id,
+      status: updatedOrder.status,
+    });
+  }
+
   const sellerOrder = await getOrderForSeller(orderId, user.id);
 
   if (!sellerOrder) {
-    return NextResponse.json(
-      { error: "Order not found" },
-      { status: 404 }
-    );
+    return NextResponse.json({ error: "Order not found" }, { status: 404 });
   }
 
   if (!sellerOrder.sellerOwnsAllItems) {
