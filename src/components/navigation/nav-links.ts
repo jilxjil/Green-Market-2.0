@@ -1,6 +1,7 @@
 import {
   Home,
   LayoutDashboard,
+  MessageSquare,
   Package,
   ClipboardList,
   ShoppingCart,
@@ -98,6 +99,11 @@ export const sellerLinks: NavigationLink[] = [
     label: "Orders",
     href: "/dashboard/seller/orders",
     icon: ClipboardList,
+  },
+  {
+    label: "Requests",
+    href: "/dashboard/seller/requests",
+    icon: MessageSquare,
   },
 ]
 
