@@ -1,15 +1,39 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-export default function SetupClient({ userId }: { userId: string }) {
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+const ROLE_STORAGE_KEY = "green-market-signup-role";
+
+export default function SetupForm({ userId }: { userId: string }) {
   const [role, setRole] = useState("buyer");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const router = useRouter();
 
-  const submit = async () => {
+  useEffect(() => {
+    const storedRole = window.sessionStorage.getItem(ROLE_STORAGE_KEY);
+    if (
+      storedRole === "buyer" ||
+      storedRole === "seller" ||
+      storedRole === "expert"
+    ) {
+      setRole(storedRole);
+    }
+  }, []);
+
+  async function submit() {
     setLoading(true);
+    setError("");
 
     const res = await fetch("/api/profile/setup", {
       method: "POST",
@@ -17,26 +41,53 @@ export default function SetupClient({ userId }: { userId: string }) {
       body: JSON.stringify({ userId, role }),
     });
 
-    if (res.ok) {
-      router.push("/dashboard");
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      setError(data.error || "Unable to complete setup.");
+      setLoading(false);
+      return;
     }
 
-    setLoading(false);
-  };
+    window.sessionStorage.removeItem(ROLE_STORAGE_KEY);
+    router.push("/dashboard");
+  }
 
   return (
-    <div>
-      <h1>Complete Setup</h1>
+    <div className="mx-auto flex min-h-[60vh] max-w-lg flex-col justify-center px-4 py-10">
+      <div className="space-y-2 text-center">
+        <h1 className="text-3xl font-bold tracking-tight">Complete setup</h1>
+        <p className="text-muted-foreground">
+          Choose how you want to use Green Market.
+        </p>
+      </div>
 
-      <select value={role} onChange={(e) => setRole(e.target.value)}>
-        <option value="buyer">Buyer</option>
-        <option value="seller">Seller</option>
-        <option value="expert">Expert</option>
-      </select>
+      <div className="mt-8 space-y-6 rounded-lg border bg-card p-6">
+        <div className="space-y-2">
+          <p className="text-sm font-medium">Your role</p>
+          <Select
+            value={role}
+            onValueChange={(value) => value && setRole(value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select a role" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="buyer">Buyer</SelectItem>
+              <SelectItem value="seller">Seller</SelectItem>
+              <SelectItem value="expert">Expert</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
 
-      <button onClick={submit} disabled={loading}>
-        Continue
-      </button>
+        {error && <p className="text-sm text-destructive">{error}</p>}
+
+        <Button className="w-full" type="button" disabled={loading} onClick={submit}>
+          {loading ? "Saving..." : "Continue to dashboard"}
+        </Button>
+      </div>
     </div>
   );
 }
+
+export { ROLE_STORAGE_KEY };

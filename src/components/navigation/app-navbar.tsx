@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation"
 
+import ExpertNavbar from "./expert/expert-navbar"
 import MarketplaceNavbar from "./marketplace/marketplace-navbar"
 import SellerNavbar from "./seller/seller-navbar"
 
@@ -10,6 +11,10 @@ export default function AppNavbar() {
 
   if (pathname.startsWith("/dashboard/seller")) {
     return <SellerNavbar />
+  }
+
+  if (pathname.startsWith("/dashboard/expert")) {
+    return <ExpertNavbar />
   }
 
   return <MarketplaceNavbar />

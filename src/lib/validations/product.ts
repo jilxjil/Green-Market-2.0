@@ -1,14 +1,24 @@
 import { z } from "zod";
 
-export const productSchema = z.object({
-    name: z.string().min(2, "Product name must be at least 2 characters long"),
-    description: z.string().min(10, "Description must be at least 10 characters long"),
-    category: z.string().min(2, "Category is required"),
-    price: z.coerce.number().positive("Price must be greater than 0"),
-    quantity: z.coerce.number().int().positive("Quantity must be greater than 0"),
-    unit: z.string().min(1, "Unit is required"),
-    imageUrl: z.string().url().optional().or(z.literal("")),
-    location: z.string().optional(),
+import { productStatuses } from "@/lib/product-utils";
+
+export const productCreateSchema = z.object({
+  title: z.string().trim().min(2, "Title must be at least 2 characters long"),
+  description: z.string().trim().optional(),
+  category: z.string().trim().optional(),
+  price: z.coerce.number().int().positive("Price must be greater than 0"),
+  stockQuantity: z.coerce.number().int().min(0, "Stock cannot be negative").default(0),
+  imageUrl: z.string().trim().optional(),
 });
 
-export type ProductType = z.infer<typeof productSchema>;
+export const productUpdateSchema = productCreateSchema
+  .partial()
+  .extend({
+    status: z.enum(productStatuses).optional(),
+  })
+  .refine((value) => Object.keys(value).length > 0, {
+    message: "At least one field must be provided",
+  });
+
+export type ProductCreateInput = z.infer<typeof productCreateSchema>;
+export type ProductUpdateInput = z.infer<typeof productUpdateSchema>;

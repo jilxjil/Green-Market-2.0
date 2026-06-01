@@ -3,3 +3,5 @@ export * from "./auth";
 export * from "./products";
 export * from "./orders";
 export * from "./order-items";
+export * from "./expert-services";
+export * from "./consultation-requests";

@@ -71,22 +71,22 @@ export function SignupForm({
       return;
     }
 
-    try{
+    try {
       const res = await authClient.signUp.email({
-  email: formData.email,
-  password: formData.password,
-  name: formData.name,
-})
+        email: formData.email,
+        password: formData.password,
+        name: formData.name,
+      });
 
-if (res.error) {
-  alert(res.error.message)
-  return
-}
+      if (res.error) {
+        alert(res.error.message);
+        return;
+      }
 
-console.log(res.data)
-router.replace("/dashboard")
+      window.sessionStorage.setItem("green-market-signup-role", formData.role);
+      router.replace("/dashboard");
     } catch (error) {
-      console.error(error)
+      console.error(error);
     }
    
     
@@ -187,6 +187,33 @@ router.replace("/dashboard")
                   })
                 }
               />
+            </Field>
+
+            <Field>
+              <FieldLabel htmlFor="role">I want to join as</FieldLabel>
+              <Select
+                value={formData.role}
+                onValueChange={(value) =>
+                  value &&
+                  setFormData({
+                    ...formData,
+                    role: value,
+                  })
+                }
+              >
+                <SelectTrigger id="role">
+                  <SelectValue placeholder="Select a role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectGroup>
+                    {items.map((item) => (
+                      <SelectItem key={item.value} value={item.value}>
+                        {item.label}
+                      </SelectItem>
+                    ))}
+                  </SelectGroup>
+                </SelectContent>
+              </Select>
             </Field>
 
             <Field className="space-y-3">

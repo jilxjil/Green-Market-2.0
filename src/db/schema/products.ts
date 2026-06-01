@@ -29,6 +29,10 @@ export const products = pgTable("products", {
 
   imageUrl: text("image_url"),
 
+  status: text("status")
+    .notNull()
+    .default("active"),
+
   createdAt: timestamp("created_at")
     .defaultNow()
     .notNull(),

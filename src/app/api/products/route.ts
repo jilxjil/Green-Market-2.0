@@ -4,30 +4,28 @@ import { desc, eq } from "drizzle-orm";
 
 import { auth } from "@/lib/auth/auth";
 import { db } from "@/db";
-
+import { getPublicProducts } from "@/lib/products";
+import { productCreateSchema } from "@/lib/validations/product";
 import { products, profiles } from "@/db/schema";
 
-export async function GET() {
-  const allProducts = await db
-    .select()
-    .from(products)
-    .orderBy(desc(products.createdAt));
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const q = searchParams.get("q") ?? undefined;
+  const category = searchParams.get("category") ?? undefined;
+
+  const allProducts = await getPublicProducts({ q, category });
 
   return NextResponse.json(allProducts);
 }
 
 export async function POST(req: Request) {
   try {
-    // 1. SESSION CHECK
     const session = await auth.api.getSession({
       headers: await headers(),
     });
 
     if (!session?.user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const profile = await db.query.profiles.findFirst({
@@ -41,47 +39,33 @@ export async function POST(req: Request) {
       );
     }
 
-    // 3. REQUEST BODY
-    const body = await req.json();
+    const body = await req.json().catch(() => null);
+    const parsed = productCreateSchema.safeParse(body);
 
-    const {
-      title,
-      description,
-      category,
-      price,
-      stockQuantity,
-      imageUrl,
-    } = body;
-
-    // 4. VALIDATION (minimal MVP level)
-    if (!title || Number(price) <= 0) {
+    if (!parsed.success) {
       return NextResponse.json(
-        { error: "Title and price are required" },
+        { error: "Invalid request body", issues: parsed.error.flatten().fieldErrors },
         { status: 400 }
       );
     }
 
-    // 5. INSERT PRODUCT
+    const stockQuantity = parsed.data.stockQuantity ?? 0;
+
     await db.insert(products).values({
       sellerId: session.user.id,
-      title,
-      description,
-      category,
-      price: Number(price),
-      stockQuantity: stockQuantity ? Number(stockQuantity) : 0,
-      imageUrl,
+      title: parsed.data.title,
+      description: parsed.data.description,
+      category: parsed.data.category,
+      price: parsed.data.price,
+      stockQuantity,
+      imageUrl: parsed.data.imageUrl || null,
+      status: stockQuantity > 0 ? "active" : "out_of_stock",
     });
 
-    return NextResponse.json({
-      success: true,
-    });
-
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error("PRODUCT CREATE ERROR:", error);
 
-    return NextResponse.json(
-      { error: "Server error" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

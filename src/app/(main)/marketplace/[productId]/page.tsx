@@ -1,11 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { eq } from "drizzle-orm";
 
-import AddToCartButton from "@/components/Product/add-to-cart-button";
+import AddToCartButton from "@/components/marketplace/add-to-cart-button";
 import { Button } from "@/components/ui/button";
-import { db } from "@/db";
-import { products } from "@/db/schema";
+import { getProductWithSeller } from "@/lib/products";
 
 export default async function ProductDetailPage({
   params,
@@ -13,15 +11,15 @@ export default async function ProductDetailPage({
   params: Promise<{ productId: string }>;
 }) {
   const { productId } = await params;
-  const product = await db.query.products.findFirst({
-    where: eq(products.id, productId),
-  });
+  const row = await getProductWithSeller(productId);
 
-  if (!product) {
+  if (!row || row.product.status === "archived") {
     notFound();
   }
 
+  const { product, sellerName, farmName, location, verificationStatus } = row;
   const stockQuantity = product.stockQuantity ?? 0;
+  const sellerLabel = farmName || sellerName;
 
   return (
     <main className="mx-auto grid max-w-6xl gap-8 px-4 py-10 md:grid-cols-[minmax(0,1fr)_420px]">
@@ -48,7 +46,7 @@ export default async function ProductDetailPage({
             Back to marketplace
           </Link>
           <h1 className="text-4xl font-bold tracking-tight">{product.title}</h1>
-          <p className="text-sm uppercase tracking-wide text-muted-foreground">
+          <p className="text-sm uppercase tracking-wide text-muted-foreground capitalize">
             {product.category || "Fresh produce"}
           </p>
         </div>
@@ -57,18 +55,29 @@ export default async function ProductDetailPage({
           <p className="text-sm text-muted-foreground">Price</p>
           <p className="mt-1 text-3xl font-bold">GH₵ {product.price}</p>
           <p className="mt-2 text-sm text-muted-foreground">
-            {stockQuantity > 0
-              ? `${stockQuantity} available`
-              : "Currently unavailable"}
+            {product.status === "out_of_stock" || stockQuantity <= 0
+              ? "Currently unavailable"
+              : `${stockQuantity} available`}
           </p>
+        </div>
+
+        <div className="rounded-lg border bg-card p-5">
+          <p className="text-sm font-medium text-muted-foreground">Sold by</p>
+          <p className="mt-1 text-lg font-semibold">{sellerLabel}</p>
+          {location && (
+            <p className="mt-1 text-sm text-muted-foreground">{location}</p>
+          )}
+          {verificationStatus && (
+            <p className="mt-2 inline-flex rounded-full bg-muted px-3 py-1 text-xs font-medium capitalize">
+              {verificationStatus}
+            </p>
+          )}
         </div>
 
         {product.description && (
           <div className="space-y-2">
             <h2 className="text-xl font-semibold">Description</h2>
-            <p className="leading-7 text-muted-foreground">
-              {product.description}
-            </p>
+            <p className="leading-7 text-muted-foreground">{product.description}</p>
           </div>
         )}
 

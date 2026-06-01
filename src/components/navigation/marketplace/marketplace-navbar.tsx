@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { Suspense } from "react";
 import { ShoppingCart } from "lucide-react";
 import Logo from "../shared/logo";
 import Notifications from "../shared/notifications";
@@ -34,7 +35,9 @@ export default function MarketplaceNavbar() {
 
           {/* Search below, full container width */}
           <div className="pb-3">
-            <SearchBar />
+            <Suspense fallback={null}>
+              <SearchBar />
+            </Suspense>
           </div>
 
         </div>

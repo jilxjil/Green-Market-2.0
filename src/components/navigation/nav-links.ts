@@ -2,8 +2,10 @@ import {
   Home,
   LayoutDashboard,
   Package,
+  ClipboardList,
   ShoppingCart,
   Store,
+  User,
   type LucideIcon,
 } from "lucide-react"
 
@@ -24,6 +26,10 @@ export const publicLinks: NavigationLink[] = [
     href: "/marketplace",
   },
   {
+    label: "Experts",
+    href: "/experts",
+  },
+  {
     label: "Dashboard",
     href: "/dashboard",
   },
@@ -33,6 +39,10 @@ export const marketplaceLinks: NavigationLink[] = [
   {
     label: "Marketplace",
     href: "/marketplace",
+  },
+  {
+    label: "Experts",
+    href: "/experts",
   },
   {
     label: "Cart",
@@ -75,9 +85,38 @@ export const sellerLinks: NavigationLink[] = [
     exact: true,
   },
   {
+    label: "Profile",
+    href: "/dashboard/seller/profile",
+    icon: User,
+  },
+  {
     label: "Products",
     href: "/dashboard/seller/products",
     icon: Package,
+  },
+  {
+    label: "Orders",
+    href: "/dashboard/seller/orders",
+    icon: ClipboardList,
+  },
+]
+
+export const expertLinks: NavigationLink[] = [
+  {
+    label: "Profile",
+    href: "/dashboard/expert/profile",
+    icon: LayoutDashboard,
+    exact: true,
+  },
+  {
+    label: "Services",
+    href: "/dashboard/expert/services",
+    icon: Package,
+  },
+  {
+    label: "Requests",
+    href: "/dashboard/expert/requests",
+    icon: ClipboardList,
   },
 ]
 

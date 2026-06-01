@@ -4,6 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { ShoppingCart } from "lucide-react";
 
+import { isProductPurchasable } from "@/lib/product-utils";
+
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/usecart";
 
@@ -14,6 +16,7 @@ interface AddToCartButtonProps {
     price: number;
     imageUrl: string | null;
     stockQuantity: number | null;
+    status?: string | null;
   };
 }
 
@@ -21,7 +24,7 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
   const [added, setAdded] = useState(false);
   const { addItem } = useCart();
   const stockQuantity = product.stockQuantity ?? 0;
-  const isOutOfStock = stockQuantity <= 0;
+  const isOutOfStock = !isProductPurchasable(product);
 
   function handleAddToCart() {
     addItem({

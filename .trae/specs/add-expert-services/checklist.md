@@ -1,0 +1,7 @@
+- [ ] Expert dashboard access is protected by the shared `expert` role guard and redirects non-experts appropriately
+- [ ] Expert profile can be read and updated; data persists after refresh
+- [ ] Expert can create, edit, and archive service listings; archived services are hidden from public discovery
+- [ ] Buyer/seller can discover expert services and submit a consultation request
+- [ ] Expert can view incoming consultation requests and update status with enforced transitions
+- [ ] Request terminal states are read-only
+- [ ] Typecheck passes and lint passes
