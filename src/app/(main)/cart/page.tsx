@@ -4,9 +4,11 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/usecart";
+import { formatProductAvailability, formatProductPrice } from "@/lib/product-units";
 
 export default function CartPage() {
   const router = useRouter();
@@ -14,6 +16,7 @@ export default function CartPage() {
     useCart();
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [error, setError] = useState("");
+  const [shippingAddress, setShippingAddress] = useState("");
 
   async function checkout() {
     setIsCheckingOut(true);
@@ -29,18 +32,22 @@ export default function CartPage() {
           productId: item.productId,
           quantity: item.quantity,
         })),
+        shippingAddress,
       }),
     });
 
     const data = await res.json().catch(() => ({}));
 
     if (res.status === 401) {
+      setIsCheckingOut(false);
       router.push("/login?next=/cart");
       return;
     }
 
     if (!res.ok) {
-      setError(data.error || "Unable to place order.");
+      const message = data.error || "Unable to place order.";
+      setError(message);
+      toast.error(message);
       setIsCheckingOut(false);
       return;
     }
@@ -108,16 +115,17 @@ export default function CartPage() {
                 {item.title}
               </Link>
               <p className="mt-1 text-sm text-muted-foreground">
-                GH₵ {item.price} each
+                {formatProductPrice(item.price, item.unitOfMeasure)}
               </p>
               <p className="mt-1 text-sm text-muted-foreground">
-                {item.stockQuantity} available
+                {formatProductAvailability(item.stockQuantity, item.unitOfMeasure)}
               </p>
             </div>
 
             <label className="space-y-1">
               <span className="text-xs font-medium text-muted-foreground">
                 Qty
+                <span className="sr-only"> in {item.unitOfMeasure}</span>
               </span>
               <input
                 className="h-10 w-full rounded-md border bg-background px-3"
@@ -149,6 +157,15 @@ export default function CartPage() {
           <span className="text-muted-foreground">Subtotal</span>
           <span className="text-2xl font-bold">GH₵ {subtotal}</span>
         </div>
+        <label className="mt-5 block space-y-2">
+          <span className="text-sm font-medium">Delivery address</span>
+          <textarea
+            className="min-h-28 w-full rounded-lg border bg-background px-3 py-2 text-sm outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50"
+            placeholder="Street, town/city, region, phone landmark"
+            value={shippingAddress}
+            onChange={(event) => setShippingAddress(event.target.value)}
+          />
+        </label>
         <p className="mt-4 text-sm text-muted-foreground">
           No online payment yet. Seller will confirm your order.
         </p>

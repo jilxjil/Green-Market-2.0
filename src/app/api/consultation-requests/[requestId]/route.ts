@@ -9,6 +9,8 @@ import {
   isConsultationRequestStatus,
   isExpertNextStatus,
 } from "@/lib/consultation-requests";
+import { createNotification } from "@/lib/notifications";
+import { normalizeScheduleInput } from "@/lib/validations/consultation-meeting";
 
 export async function PATCH(
   req: Request,
@@ -103,30 +105,48 @@ export async function PATCH(
     );
   }
 
-  if (body && "scheduledFor" in body) {
+  if (
+    nextStatus === "completed" &&
+    existing.scheduledFor &&
+    existing.scheduledFor.getTime() > Date.now()
+  ) {
+    return NextResponse.json(
+      { error: "Consultations can only be completed after their scheduled time" },
+      { status: 400 }
+    );
+  }
+
+  let scheduleData:
+    | ReturnType<typeof normalizeScheduleInput>
+    | null = null;
+
+  if (nextStatus === "scheduled") {
     if (!isExpert) {
       return NextResponse.json(
-        { error: "Only the expert can set scheduledFor" },
+        { error: "Only the expert can schedule consultations" },
         { status: 403 }
       );
     }
 
-    if (nextStatus !== "scheduled") {
+    try {
+      scheduleData = normalizeScheduleInput(body);
+    } catch {
       return NextResponse.json(
-        { error: "scheduledFor can only be set when scheduling" },
+        { error: "A future scheduledFor time and valid https meetingUrl are required" },
         { status: 400 }
       );
     }
-
-    if (body.scheduledFor != null) {
-      const scheduledDate = new Date(String(body.scheduledFor));
-      if (Number.isNaN(scheduledDate.getTime())) {
-        return NextResponse.json(
-          { error: "Invalid scheduledFor" },
-          { status: 400 }
-        );
-      }
-    }
+  } else if (
+    body &&
+    ("scheduledFor" in body ||
+      "meetingUrl" in body ||
+      "meetingNotes" in body ||
+      "meetingProvider" in body)
+  ) {
+    return NextResponse.json(
+      { error: "Meeting details can only be set when scheduling" },
+      { status: 400 }
+    );
   }
 
   const whereClause = isExpert
@@ -143,12 +163,10 @@ export async function PATCH(
     .update(consultationRequests)
     .set({
       status: nextStatus,
-      scheduledFor:
-        body && "scheduledFor" in body
-          ? body.scheduledFor == null
-            ? null
-            : new Date(String(body.scheduledFor))
-          : undefined,
+      scheduledFor: scheduleData?.scheduledFor,
+      meetingUrl: scheduleData?.meetingUrl,
+      meetingNotes: scheduleData?.meetingNotes,
+      meetingProvider: scheduleData?.meetingProvider,
     })
     .where(whereClause)
     .returning();
@@ -158,6 +176,47 @@ export async function PATCH(
       { error: "Request not found" },
       { status: 404 }
     );
+  }
+
+  if (isExpert) {
+    const scheduledSuffix =
+      nextStatus === "scheduled" && scheduleData
+        ? ` for ${scheduleData.scheduledFor.toLocaleString()}`
+        : "";
+
+    await createNotification({
+      userId: existing.requesterUserId,
+      type:
+        nextStatus === "scheduled"
+          ? "consultation_scheduled"
+          : "consultation_update",
+      title:
+        nextStatus === "scheduled"
+          ? "Consultation Scheduled"
+          : "Consultation Request Updated",
+      body:
+        nextStatus === "scheduled"
+          ? `Your consultation has been scheduled${scheduledSuffix}.`
+          : `Your consultation request status changed to ${nextStatus}.`,
+      metadata: {
+        requestId,
+        href: `/consultations/${requestId}`,
+        ...(scheduleData
+          ? { scheduledFor: scheduleData.scheduledFor.toISOString() }
+          : {}),
+      },
+    });
+  } else if (isOwner && nextStatus === "cancelled") {
+    await createNotification({
+      userId: service.expertUserId,
+      type: "consultation_cancelled",
+      title: "Consultation Cancelled",
+      body: `A client has cancelled their consultation request.`,
+      metadata: {
+        requestId,
+        href: "/dashboard/expert/requests",
+      },
+    });
   }
 
   return NextResponse.json({

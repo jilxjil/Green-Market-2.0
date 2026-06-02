@@ -1,5 +1,6 @@
 import "./globals.css"
 import { AppThemeProvider } from "@/components/theme-provider";
+import { Toaster } from "sonner";
 
 export default function Layout({
     children,
@@ -12,7 +13,7 @@ export default function Layout({
              <AppThemeProvider>
                       
                        {children}
-                     
+                       <Toaster position="top-center" />
                      </AppThemeProvider>
               </body>
             </html>

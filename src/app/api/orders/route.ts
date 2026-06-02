@@ -3,9 +3,10 @@ import { eq } from "drizzle-orm";
 
 import { db } from "@/db";
 import { getCurrentUser } from "@/lib/auth/get-current-user";
-import { orderItems, orders, products, profiles } from "@/db/schema";
+import { orderItems, orders, profiles } from "@/db/schema";
 import { getProductsByIds } from "@/lib/orders";
 import { decrementProductStock, isProductPurchasable } from "@/lib/products";
+import { createNotification } from "@/lib/notifications";
 
 interface OrderRequestItem {
   productId: string;
@@ -59,10 +60,18 @@ export async function POST(req: Request) {
 
   const body = await req.json().catch(() => null);
   const items = normalizeItems(body?.items);
+  const shippingAddress = String(body?.shippingAddress ?? "").trim();
 
   if (items.length === 0) {
     return NextResponse.json(
       { error: "Cart is empty" },
+      { status: 400 }
+    );
+  }
+
+  if (shippingAddress.length < 8) {
+    return NextResponse.json(
+      { error: "Shipping address is required" },
       { status: 400 }
     );
   }
@@ -131,6 +140,8 @@ export async function POST(req: Request) {
           buyerId: profile.id,
           totalAmount: total.toString(),
           status: "pending",
+          shippingAddress,
+          fulfillmentStatus: "not_shipped",
         })
         .returning({ id: orders.id });
 
@@ -153,6 +164,19 @@ export async function POST(req: Request) {
       }
 
       orderIds.push(createdOrder.id);
+      
+      // Notify seller
+      const sellerId = sellerItems[0].product.sellerId;
+      await createNotification({
+        userId: sellerId,
+        type: "new_order",
+        title: "New Order",
+        body: `You received a new order with ${sellerItems.length} item(s).`,
+        metadata: {
+          orderId: createdOrder.id,
+          href: "/dashboard/seller/orders",
+        },
+      });
     }
 
     return orderIds;

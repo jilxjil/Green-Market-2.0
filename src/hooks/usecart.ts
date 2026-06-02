@@ -6,6 +6,7 @@ export interface CartItem {
   productId: string;
   title: string;
   price: number;
+  unitOfMeasure: string;
   imageUrl: string | null;
   stockQuantity: number;
   quantity: number;
@@ -25,7 +26,21 @@ function readStoredCart() {
 
   try {
     const value = window.localStorage.getItem(CART_STORAGE_KEY);
-    return value ? (JSON.parse(value) as CartItem[]) : [];
+    const parsed = value ? (JSON.parse(value) as Partial<CartItem>[]) : [];
+
+    return parsed
+      .filter((item): item is Partial<CartItem> & Pick<CartItem, "productId" | "title" | "price" | "stockQuantity" | "quantity"> =>
+        Boolean(item.productId && item.title && item.price !== undefined && item.stockQuantity !== undefined && item.quantity !== undefined)
+      )
+      .map((item) => ({
+        productId: item.productId,
+        title: item.title,
+        price: item.price,
+        unitOfMeasure: item.unitOfMeasure || "unit",
+        imageUrl: item.imageUrl ?? null,
+        stockQuantity: item.stockQuantity,
+        quantity: item.quantity,
+      }));
   } catch {
     return [];
   }

@@ -5,6 +5,7 @@ import { FaBalanceScale, FaCheck, FaSeedling, FaShoePrints } from "react-icons/f
 
 import MarketplaceFilters from "@/components/marketplace/marketplace-filters";
 import { getMarketplaceCategories, getPublicProducts } from "@/lib/products";
+import { formatProductAvailability, formatProductPrice } from "@/lib/product-units";
 
 export default async function MarketplacePage({
   searchParams,
@@ -111,7 +112,9 @@ export default async function MarketplacePage({
                 <div className="space-y-2 p-4">
                   <div className="flex items-start justify-between gap-3">
                     <h3 className="font-semibold text-foreground">{product.title}</h3>
-                    <p className="shrink-0 font-bold">GH₵ {product.price}</p>
+                    <p className="shrink-0 text-right font-bold">
+                      {formatProductPrice(product.price, product.unitOfMeasure)}
+                    </p>
                   </div>
                   <p className="text-sm text-muted-foreground capitalize">
                     {product.category || "Fresh produce"}
@@ -119,7 +122,7 @@ export default async function MarketplacePage({
                   <p className="text-sm text-muted-foreground">
                     {product.status === "out_of_stock" || (product.stockQuantity ?? 0) <= 0
                       ? "Out of stock"
-                      : `${product.stockQuantity} available`}
+                      : formatProductAvailability(product.stockQuantity, product.unitOfMeasure)}
                   </p>
                 </div>
               </Link>

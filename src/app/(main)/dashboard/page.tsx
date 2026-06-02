@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { db } from "@/db";
-import { profiles } from "@/db/schema";
+import { admins, profiles } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 export default async function DashboardPage() {
@@ -13,6 +13,14 @@ export default async function DashboardPage() {
 
   if (!session?.user) {
     redirect("/login");
+  }
+
+  const admin = await db.query.admins.findFirst({
+    where: eq(admins.userId, session.user.id),
+  });
+
+  if (admin) {
+    redirect("/dashboard/admin");
   }
 
   const profile = await db.query.profiles.findFirst({

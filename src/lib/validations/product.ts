@@ -7,6 +7,7 @@ export const productCreateSchema = z.object({
   description: z.string().trim().optional(),
   category: z.string().trim().optional(),
   price: z.coerce.number().int().positive("Price must be greater than 0"),
+  unitOfMeasure: z.string().trim().min(1, "Unit of measure is required").default("unit"),
   stockQuantity: z.coerce.number().int().min(0, "Stock cannot be negative").default(0),
   imageUrl: z.string().trim().optional(),
 });

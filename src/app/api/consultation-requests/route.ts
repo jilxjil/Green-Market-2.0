@@ -4,6 +4,25 @@ import { desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { consultationRequests, expertServices, profiles, user as users } from "@/db/schema";
 import { getCurrentUser } from "@/lib/auth/get-current-user";
+import { createNotification } from "@/lib/notifications";
+
+function hideMeetingUntilScheduled<T extends { request: typeof consultationRequests.$inferSelect }>(
+  row: T
+) {
+  if (row.request.status === "scheduled") {
+    return row;
+  }
+
+  return {
+    ...row,
+    request: {
+      ...row.request,
+      meetingUrl: null,
+      meetingNotes: null,
+      meetingProvider: null,
+    },
+  };
+}
 
 export async function GET() {
   const user = await getCurrentUser();
@@ -33,7 +52,7 @@ export async function GET() {
       .where(eq(expertServices.expertUserId, user.id))
       .orderBy(desc(consultationRequests.createdAt));
 
-    return NextResponse.json(rows);
+    return NextResponse.json(rows.map(hideMeetingUntilScheduled));
   }
 
   if (profile.role === "buyer" || profile.role === "seller") {
@@ -47,7 +66,7 @@ export async function GET() {
       .where(eq(consultationRequests.requesterUserId, user.id))
       .orderBy(desc(consultationRequests.createdAt));
 
-    return NextResponse.json(rows);
+    return NextResponse.json(rows.map(hideMeetingUntilScheduled));
   }
 
   return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -110,9 +129,19 @@ export async function POST(req: Request) {
     })
     .returning();
 
+  await createNotification({
+    userId: service.expertUserId,
+    type: "new_consultation",
+    title: "New Consultation Request",
+    body: `You received a new consultation request for ${service.title}.`,
+    metadata: {
+      requestId: created.id,
+      href: "/dashboard/expert/requests",
+    },
+  });
+
   return NextResponse.json({
     success: true,
     request: created,
   });
 }
-

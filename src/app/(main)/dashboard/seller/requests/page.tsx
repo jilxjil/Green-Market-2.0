@@ -54,6 +54,24 @@ export default async function SellerRequestsPage() {
                   Scheduled for {new Date(request.scheduledFor).toLocaleString()}
                 </p>
               )}
+              <div className="mt-4 flex flex-wrap gap-2">
+                <Link
+                  href={`/consultations/${request.id}`}
+                  className="inline-flex h-8 items-center justify-center rounded-lg border px-3 text-sm font-medium hover:bg-muted"
+                >
+                  View details
+                </Link>
+                {request.status === "scheduled" && request.meetingUrl && (
+                  <a
+                    href={request.meetingUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex h-8 items-center justify-center rounded-lg bg-primary px-3 text-sm font-medium text-primary-foreground hover:bg-primary/90"
+                  >
+                    Join consultation
+                  </a>
+                )}
+              </div>
             </article>
           ))}
         </div>
@@ -61,4 +79,3 @@ export default async function SellerRequestsPage() {
     </div>
   );
 }
-

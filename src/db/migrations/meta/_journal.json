@@ -64,6 +64,41 @@
       "when": 1780095915218,
       "tag": "0008_concerned_bloodscream",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1780096320000,
+      "tag": "0009_soft_archive_expert_services",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1780159620000,
+      "tag": "0010_product_status",
+      "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1780231260000,
+      "tag": "0011_admins_notifications",
+      "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1780260720000,
+      "tag": "0012_consultation_meeting_logistics",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1780264320000,
+      "tag": "0013_product_unit_of_measure",
+      "breakpoints": true
     }
   ]
 }

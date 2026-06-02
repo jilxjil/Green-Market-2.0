@@ -1,6 +1,8 @@
+import FulfillmentStatusForm from "@/components/orders/fulfillment-status-form";
 import OrderStatusForm from "@/components/orders/order-status-form";
 import { getSellerOrders } from "@/lib/orders";
 import { requireRole } from "@/lib/auth/require-role";
+import { formatProductPrice, getProductUnitLabel } from "@/lib/product-units";
 
 export default async function SellerOrdersPage() {
   const { user } = await requireRole("seller");
@@ -50,7 +52,8 @@ export default async function SellerOrdersPage() {
                     <div>
                       <p className="font-medium">{item.productTitle}</p>
                       <p className="text-muted-foreground">
-                        Qty {item.quantity} · GH₵ {item.priceAtPurchase} each
+                        Qty {item.quantity} {getProductUnitLabel(item.productUnitOfMeasure)} ·{" "}
+                        {formatProductPrice(item.priceAtPurchase, item.productUnitOfMeasure)}
                       </p>
                     </div>
                     <p className="font-semibold">
@@ -62,6 +65,24 @@ export default async function SellerOrdersPage() {
 
               <div className="mt-5 border-t pt-4">
                 <OrderStatusForm orderId={order.id} status={order.status} />
+              </div>
+              <div className="mt-5 border-t pt-4">
+                <h3 className="mb-3 text-sm font-semibold">Delivery</h3>
+                {order.shippingAddress && (
+                  <p className="mb-3 whitespace-pre-wrap text-sm text-muted-foreground">
+                    {order.shippingAddress}
+                  </p>
+                )}
+                <p className="mb-3 text-sm capitalize text-muted-foreground">
+                  Status: {order.fulfillmentStatus.replace("_", " ")}
+                  {order.trackingNumber ? ` · Tracking: ${order.trackingNumber}` : ""}
+                </p>
+                <FulfillmentStatusForm
+                  orderId={order.id}
+                  orderStatus={order.status}
+                  fulfillmentStatus={order.fulfillmentStatus}
+                  trackingNumber={order.trackingNumber}
+                />
               </div>
             </article>
           ))}

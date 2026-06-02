@@ -2,6 +2,8 @@ import {
   Home,
   LayoutDashboard,
   MessageSquare,
+  Shield,
+  Users,
   Package,
   ClipboardList,
   ShoppingCart,
@@ -143,6 +145,30 @@ export const buyerLinks: NavigationLink[] = [
   {
     label: "Experts",
     href: "/experts",
+  },
+]
+
+export const adminLinks: NavigationLink[] = [
+  {
+    label: "Overview",
+    href: "/dashboard/admin",
+    icon: Shield,
+    exact: true,
+  },
+  {
+    label: "Users",
+    href: "/dashboard/admin/users",
+    icon: Users,
+  },
+  {
+    label: "Sellers",
+    href: "/dashboard/admin/sellers",
+    icon: Store,
+  },
+  {
+    label: "Products",
+    href: "/dashboard/admin/products",
+    icon: Package,
   },
 ]
 

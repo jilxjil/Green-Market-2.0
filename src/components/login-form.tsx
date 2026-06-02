@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button"
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth/auth-client";
 import { loginSchema } from "@/lib/validations/auth";
+import { toast } from "sonner";
 
 import {
   Field,
@@ -33,7 +34,7 @@ export function LoginForm({
 
     const parseResult = loginSchema.safeParse(formData);
     if (!parseResult.success) {
-      alert(parseResult.error.message);
+      toast.error(parseResult.error.message);
       return;
     }
 
@@ -44,7 +45,7 @@ export function LoginForm({
       });
 
       if (res?.error) {
-        alert(res.error.message);
+        toast.error(res.error.message);
         return;
       }
 
@@ -53,7 +54,7 @@ export function LoginForm({
       }
     } catch (error) {
       console.error(error);
-      alert("An unexpected error occurred.");
+      toast.error("An unexpected error occurred.");
     }
   }  
 

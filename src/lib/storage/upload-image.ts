@@ -44,6 +44,12 @@ async function uploadToSupabase(file: File, userId: string, folder: string) {
   const supabase = getSupabaseAdmin();
 
   if (!supabase) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error(
+        "Supabase Storage is not configured. Add NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY for production uploads."
+      );
+    }
+
     return null;
   }
 
@@ -76,6 +82,10 @@ export async function uploadImage(file: File, userId: string, folder = "products
 
   if (supabaseUrl) {
     return supabaseUrl;
+  }
+
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("Production uploads require Supabase Storage configuration.");
   }
 
   return uploadToLocalDisk(file, folder);

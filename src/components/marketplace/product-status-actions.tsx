@@ -1,15 +1,18 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
+import { formatProductAvailability } from "@/lib/product-units";
 import type { ProductStatus } from "@/lib/product-utils";
 
 interface ProductStatusActionsProps {
   productId: string;
   status: string | null;
   stockQuantity: number | null;
+  unitOfMeasure?: string | null;
 }
 
 const statusLabels: Record<ProductStatus, string> = {
@@ -22,6 +25,7 @@ export default function ProductStatusActions({
   productId,
   status,
   stockQuantity,
+  unitOfMeasure,
 }: ProductStatusActionsProps) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
@@ -39,7 +43,7 @@ export default function ProductStatusActions({
     setLoading(false);
 
     if (!res.ok) {
-      alert("Unable to update product status.");
+      toast.error("Unable to update product status.");
       return;
     }
 
@@ -53,7 +57,7 @@ export default function ProductStatusActions({
           {statusLabels[currentStatus] ?? currentStatus}
         </span>
         <span className="text-sm text-muted-foreground">
-          {stockQuantity ?? 0} in stock
+          {formatProductAvailability(stockQuantity, unitOfMeasure)}
         </span>
       </div>
 

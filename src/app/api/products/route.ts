@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { headers } from "next/headers";
-import { desc, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 
 import { auth } from "@/lib/auth/auth";
 import { db } from "@/db";
@@ -57,6 +57,7 @@ export async function POST(req: Request) {
       description: parsed.data.description,
       category: parsed.data.category,
       price: parsed.data.price,
+      unitOfMeasure: parsed.data.unitOfMeasure,
       stockQuantity,
       imageUrl: parsed.data.imageUrl || null,
       status: stockQuantity > 0 ? "active" : "out_of_stock",

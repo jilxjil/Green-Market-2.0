@@ -24,6 +24,10 @@ export const products = pgTable("products", {
   price: integer("price")
     .notNull(),
 
+  unitOfMeasure: text("unit_of_measure")
+    .notNull()
+    .default("unit"),
+
   stockQuantity: integer("stock_quantity")
     .default(0),
 

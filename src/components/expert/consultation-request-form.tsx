@@ -57,7 +57,8 @@ export default function ConsultationRequestForm({
       <div className="rounded-lg border bg-card p-5">
         <h2 className="text-lg font-semibold">Request sent</h2>
         <p className="mt-2 text-sm text-muted-foreground">
-          Your consultation request for {serviceTitle} has been submitted.
+          Your consultation request for {serviceTitle} has been submitted. The
+          expert will send a meeting link once your time is confirmed.
         </p>
         <Button
           className="mt-4"

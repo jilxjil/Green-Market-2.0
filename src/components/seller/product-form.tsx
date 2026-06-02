@@ -7,12 +7,14 @@ import ImageUploadField from "@/components/marketplace/image-upload-field";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { productUnitOptions } from "@/lib/product-units";
 
 export interface ProductFormValues {
   title: string;
   description: string;
   category: string;
   price: string;
+  unitOfMeasure: string;
   stockQuantity: string;
   imageUrl: string;
 }
@@ -28,6 +30,7 @@ const defaultValues: ProductFormValues = {
   description: "",
   category: "vegetables",
   price: "",
+  unitOfMeasure: "kg",
   stockQuantity: "",
   imageUrl: "",
 };
@@ -52,6 +55,7 @@ export default function ProductForm({
       description: formData.description.trim() || undefined,
       category: formData.category.trim() || undefined,
       price: Number(formData.price),
+      unitOfMeasure: formData.unitOfMeasure.trim(),
       stockQuantity: Number(formData.stockQuantity),
       imageUrl: formData.imageUrl.trim() || undefined,
     };
@@ -126,7 +130,7 @@ export default function ProductForm({
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-2">
-          <Label htmlFor="price">Price (GH₵)</Label>
+          <Label htmlFor="price">Price per unit (GH₵)</Label>
           <Input
             id="price"
             type="number"
@@ -142,20 +146,43 @@ export default function ProductForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="stockQuantity">Stock quantity</Label>
+          <Label htmlFor="unitOfMeasure">Unit of measure</Label>
           <Input
-            id="stockQuantity"
-            type="number"
-            min={0}
-            inputMode="numeric"
-            value={formData.stockQuantity}
+            id="unitOfMeasure"
+            list="product-unit-options"
+            placeholder="kg, crate, bunch..."
+            value={formData.unitOfMeasure}
             onChange={(event) =>
-              setFormData({ ...formData, stockQuantity: event.target.value })
+              setFormData({ ...formData, unitOfMeasure: event.target.value })
             }
             required
             className="w-full"
           />
+          <datalist id="product-unit-options">
+            {productUnitOptions.map((unit) => (
+              <option key={unit} value={unit} />
+            ))}
+          </datalist>
         </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="stockQuantity">Stock units available</Label>
+        <Input
+          id="stockQuantity"
+          type="number"
+          min={0}
+          inputMode="numeric"
+          value={formData.stockQuantity}
+          onChange={(event) =>
+            setFormData({ ...formData, stockQuantity: event.target.value })
+          }
+          required
+          className="w-full"
+        />
+        <p className="text-xs text-muted-foreground">
+          This is the number of {formData.unitOfMeasure || "units"} available for sale.
+        </p>
       </div>
 
       <ImageUploadField

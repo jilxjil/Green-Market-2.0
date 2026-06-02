@@ -46,6 +46,7 @@ export default async function EditProductPage({
           description: product.description ?? "",
           category: product.category ?? "",
           price: String(product.price),
+          unitOfMeasure: product.unitOfMeasure ?? "unit",
           stockQuantity: String(product.stockQuantity ?? 0),
           imageUrl: product.imageUrl ?? "",
         }}

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { db } from "@/db";
 import { products } from "@/db/schema";
 import { requireRole } from "@/lib/auth/require-role";
+import { formatProductAvailability, formatProductPrice } from "@/lib/product-units";
 
 export default async function ProductsPage() {
   const { user } = await requireRole("seller");
@@ -57,7 +58,12 @@ export default async function ProductsPage() {
               <p className="mt-1 text-sm capitalize text-muted-foreground">
                 {product.category || "Fresh produce"}
               </p>
-              <p className="mt-3 text-lg font-bold">GH₵ {product.price}</p>
+              <p className="mt-3 text-lg font-bold">
+                {formatProductPrice(product.price, product.unitOfMeasure)}
+              </p>
+              <p className="text-sm text-muted-foreground">
+                {formatProductAvailability(product.stockQuantity, product.unitOfMeasure)}
+              </p>
 
               <div className="mt-4">
                 <Button asChild variant="outline" size="sm" className="w-full">
@@ -75,6 +81,7 @@ export default async function ProductsPage() {
                 productId={product.id}
                 status={product.status}
                 stockQuantity={product.stockQuantity}
+                unitOfMeasure={product.unitOfMeasure}
               />
             </article>
           ))}

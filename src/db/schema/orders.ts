@@ -8,5 +8,8 @@ export const orders = pgTable("orders", {
         .references(() => profiles.id, {onDelete: "cascade"}),
     totalAmount: numeric("total_amount", {precision: 10, scale: 2}).notNull(),
     status: text("status").notNull().default("pending"),
+    shippingAddress: text("shipping_address"),
+    fulfillmentStatus: text("fulfillment_status").notNull().default("not_shipped"),
+    trackingNumber: text("tracking_number"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
 })

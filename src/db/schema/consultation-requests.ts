@@ -18,6 +18,9 @@ export const consultationRequests = pgTable("consultation_requests", {
   status: text("status").notNull().default("pending"),
 
   scheduledFor: timestamp("scheduled_for"),
+  meetingUrl: text("meeting_url"),
+  meetingNotes: text("meeting_notes"),
+  meetingProvider: text("meeting_provider"),
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });

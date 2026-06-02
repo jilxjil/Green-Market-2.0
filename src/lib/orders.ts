@@ -4,8 +4,10 @@ import { db } from "@/db";
 import { orderItems, orders, products, profiles } from "@/db/schema";
 
 export const orderStatuses = ["pending", "confirmed", "fulfilled", "cancelled"] as const;
+export const fulfillmentStatuses = ["not_shipped", "shipped", "delivered"] as const;
 
 export type OrderStatus = (typeof orderStatuses)[number];
+export type FulfillmentStatus = (typeof fulfillmentStatuses)[number];
 
 export interface OrderLine {
   id: string;
@@ -15,6 +17,7 @@ export interface OrderLine {
   productId: string;
   productTitle: string;
   productSellerId: string;
+  productUnitOfMeasure: string;
 }
 
 export interface OrderSummary {
@@ -24,11 +27,18 @@ export interface OrderSummary {
   createdAt: Date;
   buyerId: string;
   buyerUserId: string;
+  shippingAddress: string | null;
+  fulfillmentStatus: string;
+  trackingNumber: string | null;
   items: OrderLine[];
 }
 
 export function isOrderStatus(status: string): status is OrderStatus {
   return orderStatuses.includes(status as OrderStatus);
+}
+
+export function isFulfillmentStatus(status: string): status is FulfillmentStatus {
+  return fulfillmentStatuses.includes(status as FulfillmentStatus);
 }
 
 export function canTransitionOrderStatus(currentStatus: string, nextStatus: OrderStatus) {
@@ -64,6 +74,9 @@ function groupOrderRows(
         createdAt: row.order.createdAt,
         buyerId: row.order.buyerId,
         buyerUserId: row.buyer.userId,
+        shippingAddress: row.order.shippingAddress,
+        fulfillmentStatus: row.order.fulfillmentStatus,
+        trackingNumber: row.order.trackingNumber,
         items: [],
       };
 
@@ -75,6 +88,7 @@ function groupOrderRows(
       productId: row.product.id,
       productTitle: row.product.title,
       productSellerId: row.product.sellerId,
+      productUnitOfMeasure: row.product.unitOfMeasure ?? "unit",
     });
 
     groupedOrders.set(order.id, order);
@@ -166,6 +180,29 @@ export async function updateOrderStatus(orderId: string, status: OrderStatus) {
     .set({ status })
     .where(and(eq(orders.id, orderId)))
     .returning({ id: orders.id, status: orders.status });
+
+  return updatedOrder;
+}
+
+export async function updateOrderFulfillment(
+  orderId: string,
+  data: {
+    fulfillmentStatus: FulfillmentStatus;
+    trackingNumber?: string | null;
+  }
+) {
+  const [updatedOrder] = await db
+    .update(orders)
+    .set({
+      fulfillmentStatus: data.fulfillmentStatus,
+      trackingNumber: data.trackingNumber ?? null,
+    })
+    .where(and(eq(orders.id, orderId)))
+    .returning({
+      id: orders.id,
+      fulfillmentStatus: orders.fulfillmentStatus,
+      trackingNumber: orders.trackingNumber,
+    });
 
   return updatedOrder;
 }

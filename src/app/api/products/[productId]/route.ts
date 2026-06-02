@@ -4,7 +4,7 @@ import { and, eq } from "drizzle-orm";
 
 import { auth } from "@/lib/auth/auth";
 import { db } from "@/db";
-import { isProductPurchasable, resolveProductStatus } from "@/lib/products";
+import { resolveProductStatus } from "@/lib/products";
 import { productUpdateSchema } from "@/lib/validations/product";
 import { products, profiles } from "@/db/schema";
 
@@ -91,6 +91,7 @@ export async function PATCH(
     if (parsed.data.description !== undefined) updates.description = parsed.data.description;
     if (parsed.data.category !== undefined) updates.category = parsed.data.category;
     if (parsed.data.price !== undefined) updates.price = parsed.data.price;
+    if (parsed.data.unitOfMeasure !== undefined) updates.unitOfMeasure = parsed.data.unitOfMeasure;
     if (parsed.data.stockQuantity !== undefined) updates.stockQuantity = parsed.data.stockQuantity;
     if (parsed.data.imageUrl !== undefined) updates.imageUrl = parsed.data.imageUrl || null;
 

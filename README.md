@@ -34,3 +34,13 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Supabase Storage Production Checklist
+
+When running in production (`NODE_ENV=production`), image uploads require a Supabase Storage bucket. The API rejects production uploads when Supabase is not configured instead of falling back to local disk.
+
+1. Create a public bucket named `product-images` in your Supabase project dashboard under Storage.
+2. Add the following Storage RLS policies to allow public reads and authenticated uploads:
+   - **Select (Read):** `bucket_id = 'product-images'` (Target roles: `public`)
+   - **Insert (Upload):** `bucket_id = 'product-images'` (Target roles: `authenticated`)
+3. Add `NEXT_PUBLIC_SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `SUPABASE_STORAGE_BUCKET` to your `.env.local` or Vercel environment variables.

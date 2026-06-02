@@ -14,6 +14,7 @@ interface AddToCartButtonProps {
     id: string;
     title: string;
     price: number;
+    unitOfMeasure: string;
     imageUrl: string | null;
     stockQuantity: number | null;
     status?: string | null;
@@ -31,6 +32,7 @@ export default function AddToCartButton({ product }: AddToCartButtonProps) {
       productId: product.id,
       title: product.title,
       price: product.price,
+      unitOfMeasure: product.unitOfMeasure,
       imageUrl: product.imageUrl,
       stockQuantity,
     });

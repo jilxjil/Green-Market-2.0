@@ -4,6 +4,7 @@ import { useState } from "react"
 import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth/auth-client";
 import { registerSchema } from "@/lib/validations/auth";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button"
 import {
@@ -55,7 +56,7 @@ export function SignupForm({
     e.preventDefault()
 
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match")
+      toast.error("Passwords do not match");
       return
     }
 
@@ -67,7 +68,7 @@ export function SignupForm({
     });
 
     if (!parseResult.success) {
-      alert(parseResult.error.message);
+      toast.error(parseResult.error.message);
       return;
     }
 
@@ -79,7 +80,7 @@ export function SignupForm({
       });
 
       if (res.error) {
-        alert(res.error.message);
+        toast.error(res.error.message);
         return;
       }
 

@@ -1,1 +1,1 @@
-ALTER TABLE "expert_services" ADD COLUMN "archived_at" timestamp;
+ALTER TABLE "expert_services" ADD COLUMN IF NOT EXISTS "archived_at" timestamp;

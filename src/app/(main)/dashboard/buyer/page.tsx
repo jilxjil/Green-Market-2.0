@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { getRequesterConsultationRequests } from "@/lib/consultation-requests-db";
 import { getBuyerOrders } from "@/lib/orders";
 import { requireRole } from "@/lib/auth/require-role";
+import { formatProductPrice, getProductUnitLabel } from "@/lib/product-units";
 
 export default async function BuyerDashboard() {
   const { user, profile } = await requireRole("buyer");
@@ -74,7 +75,8 @@ export default async function BuyerDashboard() {
                         {item.productTitle}
                       </Link>
                       <p className="text-muted-foreground">
-                        Qty {item.quantity} · GH₵ {item.priceAtPurchase} each
+                        Qty {item.quantity} {getProductUnitLabel(item.productUnitOfMeasure)} ·{" "}
+                        {formatProductPrice(item.priceAtPurchase, item.productUnitOfMeasure)}
                       </p>
                     </div>
                     <p className="font-semibold">
@@ -85,6 +87,18 @@ export default async function BuyerDashboard() {
               </div>
 
               <div className="mt-5 border-t pt-4">
+                <div className="mb-4 rounded-lg bg-muted/50 p-3 text-sm">
+                  <p className="font-medium">Delivery status</p>
+                  <p className="mt-1 capitalize text-muted-foreground">
+                    {order.fulfillmentStatus.replace("_", " ")}
+                    {order.trackingNumber ? ` · Tracking: ${order.trackingNumber}` : ""}
+                  </p>
+                  {order.shippingAddress && (
+                    <p className="mt-2 whitespace-pre-wrap text-muted-foreground">
+                      {order.shippingAddress}
+                    </p>
+                  )}
+                </div>
                 <CancelOrderButton orderId={order.id} status={order.status} />
               </div>
             </article>
@@ -130,6 +144,22 @@ export default async function BuyerDashboard() {
                   Scheduled for {request.scheduledFor.toLocaleString()}
                 </p>
               )}
+              <div className="mt-4 flex flex-wrap gap-2">
+                <Button asChild variant="outline">
+                  <Link href={`/consultations/${request.id}`}>View details</Link>
+                </Button>
+                {request.status === "scheduled" && request.meetingUrl && (
+                  <Button asChild>
+                    <a
+                      href={request.meetingUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      Join consultation
+                    </a>
+                  </Button>
+                )}
+              </div>
             </article>
           ))
         )}

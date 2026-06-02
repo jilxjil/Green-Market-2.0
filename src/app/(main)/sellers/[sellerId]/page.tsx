@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { getSellerStorefront } from "@/lib/sellers";
+import { formatProductAvailability, formatProductPrice } from "@/lib/product-units";
 
 export default async function SellerStorefrontPage({
   params,
@@ -68,13 +69,15 @@ export default async function SellerStorefrontPage({
                     <h3 className="font-semibold text-foreground">
                       {product.title}
                     </h3>
-                    <p className="shrink-0 font-bold">GH₵ {product.price}</p>
+                    <p className="shrink-0 text-right font-bold">
+                      {formatProductPrice(product.price, product.unitOfMeasure)}
+                    </p>
                   </div>
                   <p className="text-sm text-muted-foreground capitalize">
                     {product.category || "Fresh produce"}
                   </p>
                   <p className="text-sm text-muted-foreground">
-                    {product.stockQuantity ?? 0} available
+                    {formatProductAvailability(product.stockQuantity, product.unitOfMeasure)}
                   </p>
                 </div>
               </Link>
@@ -85,4 +88,3 @@ export default async function SellerStorefrontPage({
     </main>
   );
 }
-

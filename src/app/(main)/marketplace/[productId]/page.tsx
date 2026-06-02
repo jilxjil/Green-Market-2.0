@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import AddToCartButton from "@/components/marketplace/add-to-cart-button";
 import { Button } from "@/components/ui/button";
 import { getProductWithSeller } from "@/lib/products";
+import { formatProductAvailability, formatProductPrice } from "@/lib/product-units";
 
 export default async function ProductDetailPage({
   params,
@@ -53,11 +54,13 @@ export default async function ProductDetailPage({
 
         <div className="rounded-lg border bg-card p-5">
           <p className="text-sm text-muted-foreground">Price</p>
-          <p className="mt-1 text-3xl font-bold">GH₵ {product.price}</p>
+          <p className="mt-1 text-3xl font-bold">
+            {formatProductPrice(product.price, product.unitOfMeasure)}
+          </p>
           <p className="mt-2 text-sm text-muted-foreground">
             {product.status === "out_of_stock" || stockQuantity <= 0
               ? "Currently unavailable"
-              : `${stockQuantity} available`}
+              : formatProductAvailability(stockQuantity, product.unitOfMeasure)}
           </p>
         </div>
 

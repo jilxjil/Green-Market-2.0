@@ -85,7 +85,7 @@ export default function ImageUploadField({ value, onChange }: ImageUploadFieldPr
       />
 
       <p className="text-xs text-muted-foreground">
-        JPG, PNG, WEBP, or GIF up to 5MB. Uses cloud storage when configured.
+        JPG, PNG, WEBP, or GIF up to 5MB. Production uploads require Supabase Storage.
       </p>
 
       {error && <p className="text-sm text-destructive">{error}</p>}

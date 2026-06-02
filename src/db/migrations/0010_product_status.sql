@@ -1,1 +1,1 @@
-ALTER TABLE "products" ADD COLUMN "status" text DEFAULT 'active' NOT NULL;
+ALTER TABLE "products" ADD COLUMN IF NOT EXISTS "status" text DEFAULT 'active' NOT NULL;
