@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 
+import { ProfileFormSkeleton } from "@/components/loading/page-skeletons";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -77,7 +78,7 @@ export default function SellerProfileForm() {
   }
 
   if (loading) {
-    return <p className="text-muted-foreground">Loading profile...</p>;
+    return <ProfileFormSkeleton />;
   }
 
   return (

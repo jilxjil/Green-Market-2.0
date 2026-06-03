@@ -1,6 +1,8 @@
 import Link from "next/link";
 
+import StartConversationButton from "@/components/messages/start-conversation-button";
 import CancelOrderButton from "@/components/orders/cancel-order-button";
+import ReviewForm from "@/components/reviews/review-form";
 import { Button } from "@/components/ui/button";
 import { getRequesterConsultationRequests } from "@/lib/consultation-requests-db";
 import { getBuyerOrders } from "@/lib/orders";
@@ -99,8 +101,27 @@ export default async function BuyerDashboard() {
                     </p>
                   )}
                 </div>
-                <CancelOrderButton orderId={order.id} status={order.status} />
+                <div className="flex flex-wrap gap-2">
+                  <CancelOrderButton orderId={order.id} status={order.status} />
+                  <StartConversationButton orderId={order.id} label="Message seller" />
+                </div>
               </div>
+
+              {order.status === "fulfilled" && (
+                <div className="mt-5 border-t pt-4">
+                  <h4 className="mb-3 text-sm font-semibold">Review your items</h4>
+                  <div className="space-y-3">
+                    {order.items.map((item) => (
+                      <ReviewForm
+                        key={item.id}
+                        orderId={order.id}
+                        productId={item.productId}
+                        productTitle={item.productTitle}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
             </article>
           ))
         )}
@@ -159,6 +180,10 @@ export default async function BuyerDashboard() {
                     </a>
                   </Button>
                 )}
+                <StartConversationButton
+                  consultationRequestId={request.id}
+                  label="Message expert"
+                />
               </div>
             </article>
           ))

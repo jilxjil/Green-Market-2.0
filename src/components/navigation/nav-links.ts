@@ -1,5 +1,6 @@
 import {
   Home,
+  BarChart3,
   LayoutDashboard,
   MessageSquare,
   Shield,
@@ -103,6 +104,16 @@ export const sellerLinks: NavigationLink[] = [
     icon: ClipboardList,
   },
   {
+    label: "Messages",
+    href: "/dashboard/messages",
+    icon: MessageSquare,
+  },
+  {
+    label: "Analytics",
+    href: "/dashboard/seller/analytics",
+    icon: BarChart3,
+  },
+  {
     label: "Requests",
     href: "/dashboard/seller/requests",
     icon: MessageSquare,
@@ -126,6 +137,16 @@ export const expertLinks: NavigationLink[] = [
     href: "/dashboard/expert/requests",
     icon: ClipboardList,
   },
+  {
+    label: "Messages",
+    href: "/dashboard/messages",
+    icon: MessageSquare,
+  },
+  {
+    label: "Analytics",
+    href: "/dashboard/expert/analytics",
+    icon: BarChart3,
+  },
 ]
 
 export const buyerLinks: NavigationLink[] = [
@@ -137,6 +158,11 @@ export const buyerLinks: NavigationLink[] = [
   {
     label: "Profile",
     href: "/dashboard/buyer/profile",
+  },
+  {
+    label: "Messages",
+    href: "/dashboard/messages",
+    icon: MessageSquare,
   },
   {
     label: "Marketplace",

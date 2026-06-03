@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
+import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/hooks/usecart";
 import { formatProductAvailability, formatProductPrice } from "@/lib/product-units";
@@ -58,8 +59,34 @@ export default function CartPage() {
 
   if (!isHydrated) {
     return (
-      <main className="mx-auto max-w-5xl px-4 py-12">
-        <p className="text-muted-foreground">Loading cart...</p>
+      <main className="mx-auto grid max-w-6xl gap-8 px-4 py-10 lg:grid-cols-[minmax(0,1fr)_360px]">
+        <section className="space-y-4">
+          <div className="space-y-3">
+            <Skeleton className="h-8 w-28" />
+            <Skeleton className="h-4 w-72 max-w-full" />
+          </div>
+          {Array.from({ length: 2 }).map((_, index) => (
+            <div
+              key={index}
+              className="grid gap-4 rounded-lg border bg-card p-4 sm:grid-cols-[96px_minmax(0,1fr)_120px_44px]"
+            >
+              <Skeleton className="h-24 w-24 rounded-md" />
+              <div className="space-y-3">
+                <Skeleton className="h-5 w-44" />
+                <Skeleton className="h-4 w-28" />
+                <Skeleton className="h-4 w-36" />
+              </div>
+              <Skeleton className="h-10 w-24 rounded-lg" />
+              <Skeleton className="h-10 w-10 rounded-lg" />
+            </div>
+          ))}
+        </section>
+        <aside className="space-y-4 rounded-lg border bg-card p-5">
+          <Skeleton className="h-6 w-32" />
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-24 w-full rounded-lg" />
+          <Skeleton className="h-11 w-full rounded-lg" />
+        </aside>
       </main>
     );
   }

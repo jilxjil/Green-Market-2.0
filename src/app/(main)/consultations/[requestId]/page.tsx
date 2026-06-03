@@ -4,6 +4,7 @@ import { ExternalLink } from "lucide-react";
 
 import CancelConsultationButton from "@/components/expert/cancel-consultation-button";
 import ConsultationCountdown from "@/components/expert/consultation-countdown";
+import StartConversationButton from "@/components/messages/start-conversation-button";
 import { Button } from "@/components/ui/button";
 import { getCurrentUser } from "@/lib/auth/get-current-user";
 import { getConsultationRequestDetail } from "@/lib/consultation-requests-db";
@@ -112,6 +113,13 @@ export default async function ConsultationDetailPage({
             status={detail.request.status}
           />
         )}
+
+        <div className="border-t pt-4">
+          <StartConversationButton
+            consultationRequestId={detail.request.id}
+            label={detail.isExpert ? "Message requester" : "Message expert"}
+          />
+        </div>
       </section>
     </main>
   );

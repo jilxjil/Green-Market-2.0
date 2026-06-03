@@ -1,3 +1,4 @@
+import StartConversationButton from "@/components/messages/start-conversation-button";
 import FulfillmentStatusForm from "@/components/orders/fulfillment-status-form";
 import OrderStatusForm from "@/components/orders/order-status-form";
 import { getSellerOrders } from "@/lib/orders";
@@ -65,6 +66,9 @@ export default async function SellerOrdersPage() {
 
               <div className="mt-5 border-t pt-4">
                 <OrderStatusForm orderId={order.id} status={order.status} />
+                <div className="mt-3">
+                  <StartConversationButton orderId={order.id} label="Message buyer" />
+                </div>
               </div>
               <div className="mt-5 border-t pt-4">
                 <h3 className="mb-3 text-sm font-semibold">Delivery</h3>

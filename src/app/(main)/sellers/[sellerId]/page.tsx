@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { getSellerStorefront } from "@/lib/sellers";
 import { formatProductAvailability, formatProductPrice } from "@/lib/product-units";
+import { getSellerReviewSummary } from "@/lib/reviews";
 
 export default async function SellerStorefrontPage({
   params,
@@ -16,7 +17,11 @@ export default async function SellerStorefrontPage({
     notFound();
   }
 
+  const reviewSummary = await getSellerReviewSummary(sellerId);
   const sellerLabel = data.seller.farmName || data.seller.name;
+  const averageRating = reviewSummary.averageRating
+    ? Number(reviewSummary.averageRating).toFixed(1)
+    : null;
 
   return (
     <main className="mx-auto max-w-7xl space-y-8 px-4 py-10 md:px-6 lg:px-8">
@@ -35,6 +40,13 @@ export default async function SellerStorefrontPage({
             </span>
           )}
         </div>
+        <p className="text-sm text-muted-foreground">
+          {averageRating
+            ? `${averageRating}/5 from ${reviewSummary.reviewCount} review${
+                reviewSummary.reviewCount === 1 ? "" : "s"
+              }`
+            : "No reviews yet"}
+        </p>
       </header>
 
       <section className="space-y-5">

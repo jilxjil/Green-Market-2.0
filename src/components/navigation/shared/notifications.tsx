@@ -1,9 +1,11 @@
 "use client";
 
-import { Bell, CheckCheck, Loader2 } from "lucide-react";
+import { Bell, CheckCheck } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+
+import { NotificationListSkeleton } from "@/components/loading/page-skeletons";
 
 interface Notification {
   id: string;
@@ -141,10 +143,7 @@ export default function Notifications() {
           </div>
           <div className="max-h-96 overflow-y-auto p-2">
             {isLoading ? (
-              <div className="flex items-center justify-center gap-2 p-4 text-sm text-muted-foreground">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Loading notifications
-              </div>
+              <NotificationListSkeleton />
             ) : error ? (
               <div className="p-4 text-center text-sm text-destructive">
                 {error}

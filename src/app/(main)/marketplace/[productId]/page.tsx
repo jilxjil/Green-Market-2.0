@@ -5,6 +5,7 @@ import AddToCartButton from "@/components/marketplace/add-to-cart-button";
 import { Button } from "@/components/ui/button";
 import { getProductWithSeller } from "@/lib/products";
 import { formatProductAvailability, formatProductPrice } from "@/lib/product-units";
+import { getProductReviewSummary } from "@/lib/reviews";
 
 export default async function ProductDetailPage({
   params,
@@ -19,8 +20,12 @@ export default async function ProductDetailPage({
   }
 
   const { product, sellerName, farmName, location, verificationStatus } = row;
+  const reviewSummary = await getProductReviewSummary(product.id);
   const stockQuantity = product.stockQuantity ?? 0;
   const sellerLabel = farmName || sellerName;
+  const averageRating = reviewSummary.averageRating
+    ? Number(reviewSummary.averageRating).toFixed(1)
+    : null;
 
   return (
     <main className="mx-auto grid max-w-6xl gap-8 px-4 py-10 md:grid-cols-[minmax(0,1fr)_420px]">
@@ -65,6 +70,21 @@ export default async function ProductDetailPage({
         </div>
 
         <div className="rounded-lg border bg-card p-5">
+          <p className="text-sm text-muted-foreground">Rating</p>
+          {averageRating ? (
+            <p className="mt-1 text-2xl font-bold">
+              {averageRating}/5{" "}
+              <span className="text-sm font-normal text-muted-foreground">
+                from {reviewSummary.reviewCount} review
+                {reviewSummary.reviewCount === 1 ? "" : "s"}
+              </span>
+            </p>
+          ) : (
+            <p className="mt-1 text-sm text-muted-foreground">No reviews yet</p>
+          )}
+        </div>
+
+        <div className="rounded-lg border bg-card p-5">
           <p className="text-sm font-medium text-muted-foreground">Sold by</p>
           <p className="mt-1 text-lg font-semibold">{sellerLabel}</p>
           {location && (
@@ -96,6 +116,27 @@ export default async function ProductDetailPage({
             <Link href="/cart">Go to cart</Link>
           </Button>
         </div>
+
+        {reviewSummary.reviews.length > 0 && (
+          <div className="space-y-3">
+            <h2 className="text-xl font-semibold">Reviews</h2>
+            <div className="space-y-3">
+              {reviewSummary.reviews.slice(0, 5).map(({ review, buyerName }) => (
+                <article key={review.id} className="rounded-lg border bg-card p-4">
+                  <div className="flex items-center justify-between gap-3">
+                    <p className="font-medium">{buyerName}</p>
+                    <p className="text-sm font-semibold">{review.rating}/5</p>
+                  </div>
+                  {review.comment && (
+                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                      {review.comment}
+                    </p>
+                  )}
+                </article>
+              ))}
+            </div>
+          </div>
+        )}
       </section>
     </main>
   );

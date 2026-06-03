@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import StartConversationButton from "@/components/messages/start-conversation-button";
 import { requireRole } from "@/lib/auth/require-role";
 import { getRequesterConsultationRequests } from "@/lib/consultation-requests-db";
 
@@ -71,6 +72,10 @@ export default async function SellerRequestsPage() {
                     Join consultation
                   </a>
                 )}
+                <StartConversationButton
+                  consultationRequestId={request.id}
+                  label="Message expert"
+                />
               </div>
             </article>
           ))}

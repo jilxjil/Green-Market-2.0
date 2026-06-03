@@ -5,6 +5,8 @@ import { useEffect, useState } from "react";
 import { Copy, ExternalLink, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
+import { CardListSkeleton } from "@/components/loading/page-skeletons";
+import StartConversationButton from "@/components/messages/start-conversation-button";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -123,7 +125,7 @@ export default function ExpertRequestsInbox() {
   }
 
   if (loading) {
-    return <p className="text-muted-foreground">Loading requests...</p>;
+    return <CardListSkeleton count={3} />;
   }
 
   if (requests.length === 0) {
@@ -345,12 +347,18 @@ export default function ExpertRequestsInbox() {
             </p>
           )}
           <div className="mt-3">
-            <Link
-              href={`/dashboard/expert/requests/${request.id}`}
-              className="text-sm font-medium text-primary hover:underline"
-            >
-              View request details
-            </Link>
+            <div className="flex flex-wrap items-center gap-3">
+              <Link
+                href={`/dashboard/expert/requests/${request.id}`}
+                className="text-sm font-medium text-primary hover:underline"
+              >
+                View request details
+              </Link>
+              <StartConversationButton
+                consultationRequestId={request.id}
+                label="Message requester"
+              />
+            </div>
           </div>
         </article>
         );
