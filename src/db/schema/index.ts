@@ -4,6 +4,7 @@ export * from "./admins";
 export * from "./products";
 export * from "./orders";
 export * from "./order-items";
+export * from "./payments";
 export * from "./expert-services";
 export * from "./consultation-requests";
 export * from "./notifications";

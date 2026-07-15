@@ -4,6 +4,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 
 import { isNavLinkActive, sellerLinks } from "../nav-links"
+import Logo from "../shared/logo"
 
 export default function SellerSidebar() {
     const pathname = usePathname();
@@ -11,9 +12,7 @@ export default function SellerSidebar() {
     return(
         <aside className="hidden md:flex h-screen w-64 flex-col border-r bg-white">
             <div className="border-b p-6">
-                <h2 className="text-xl text-primary font-alan font bold">
-                    Green Market
-                </h2>
+                <Logo textClassName="inline text-xl text-primary font-alan" />
                 <p className="text-sm text-muted-foreground">
                 Seller Dashboard
                 </p>

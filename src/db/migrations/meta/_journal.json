@@ -113,6 +113,13 @@
       "when": 1780271520000,
       "tag": "0015_chat_review_uniques",
       "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1780275120000,
+      "tag": "0016_payments",
+      "breakpoints": true
     }
   ]
 }

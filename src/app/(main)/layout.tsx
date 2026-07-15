@@ -2,6 +2,7 @@ export const dynamic = "force-dynamic";
 
 import AppNavbar from "@/components/navigation/app-navbar";
 import Footer from '../../components/common/footer';
+import SupportChatWidget from "@/components/chat/support-chat-widget";
 
 export default function MainLayout({
   children,
@@ -15,6 +16,7 @@ export default function MainLayout({
         {children}
       </main>
       <Footer/>
+      <SupportChatWidget />
     </>
   );
 }

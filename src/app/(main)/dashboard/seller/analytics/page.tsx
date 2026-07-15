@@ -5,6 +5,9 @@ import { db } from "@/db";
 import { orderItems, orders, products, reviews } from "@/db/schema";
 import { requireRole } from "@/lib/auth/require-role";
 import { getSellerReviewSummary } from "@/lib/reviews";
+import { buildDailySeries, parseAnalyticsRange, rangeStart } from "@/lib/analytics";
+import { BarSeries } from "@/components/analytics/bar-series";
+import { RangeTabs } from "@/components/analytics/range-tabs";
 
 const revenueStatuses = ["confirmed", "fulfilled"] as const;
 
@@ -15,8 +18,9 @@ function formatCurrency(value: number) {
   })}`;
 }
 
-export default async function SellerAnalyticsPage() {
+export default async function SellerAnalyticsPage({ searchParams }: { searchParams: Promise<{ days?: string }> }) {
   const { user } = await requireRole("seller");
+  const days = parseAnalyticsRange((await searchParams).days);
 
   const [orderRows, reviewSummary, recentReviews] = await Promise.all([
     db
@@ -53,20 +57,21 @@ export default async function SellerAnalyticsPage() {
       .limit(5),
   ]);
 
-  const totalRevenue = orderRows.reduce(
+  const filteredRows = orderRows.filter((row) => row.createdAt >= rangeStart(days));
+  const totalRevenue = filteredRows.reduce(
     (sum, row) => sum + Number(row.priceAtPurchase) * row.quantity,
     0
   );
-  const orderIds = new Set(orderRows.map((row) => row.orderId));
+  const orderIds = new Set(filteredRows.map((row) => row.orderId));
   const fulfilledOrderIds = new Set(
-    orderRows.filter((row) => row.orderStatus === "fulfilled").map((row) => row.orderId)
+    filteredRows.filter((row) => row.orderStatus === "fulfilled").map((row) => row.orderId)
   );
   const productRevenue = new Map<
     string,
     { title: string; revenue: number; units: number }
   >();
 
-  for (const row of orderRows) {
+  for (const row of filteredRows) {
     const current =
       productRevenue.get(row.productId) ?? {
         title: row.productTitle,
@@ -85,6 +90,7 @@ export default async function SellerAnalyticsPage() {
   const averageRating = reviewSummary.averageRating
     ? Number(reviewSummary.averageRating).toFixed(1)
     : "N/A";
+  const revenueSeries = buildDailySeries(filteredRows, days, (row) => row.createdAt, (row) => Number(row.priceAtPurchase) * row.quantity);
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-6">
@@ -97,13 +103,10 @@ export default async function SellerAnalyticsPage() {
             Revenue, fulfilled order progress, and product performance.
           </p>
         </div>
-        <Link
-          href="/dashboard/seller/orders"
-          className="inline-flex h-10 items-center justify-center rounded-lg border px-4 text-sm font-medium hover:bg-muted"
-        >
-          View orders
-        </Link>
+        <div className="flex flex-wrap gap-2"><Link href={`/api/analytics/seller/export?days=${days}`} className="inline-flex h-10 items-center justify-center rounded-lg border px-4 text-sm font-medium hover:bg-muted">Export CSV</Link><Link href="/dashboard/seller/orders" className="inline-flex h-10 items-center justify-center rounded-lg border px-4 text-sm font-medium hover:bg-muted">View orders</Link></div>
       </div>
+
+      <RangeTabs active={days} />
 
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-lg border bg-card p-5">
@@ -123,6 +126,8 @@ export default async function SellerAnalyticsPage() {
           <p className="mt-2 text-2xl font-bold">{averageRating}</p>
         </div>
       </section>
+
+      <section className="rounded-lg border bg-card p-5"><h2 className="text-lg font-semibold">Revenue over time</h2><BarSeries data={revenueSeries} valueLabel={formatCurrency} /></section>
 
       <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_360px]">
         <div className="rounded-lg border bg-card p-5">

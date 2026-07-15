@@ -23,7 +23,7 @@ export default function CartPage() {
     setIsCheckingOut(true);
     setError("");
 
-    const res = await fetch("/api/orders", {
+    const res = await fetch("/api/payments/initialize", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -46,15 +46,22 @@ export default function CartPage() {
     }
 
     if (!res.ok) {
-      const message = data.error || "Unable to place order.";
+      const message = data.error || "Unable to start payment.";
       setError(message);
       toast.error(message);
       setIsCheckingOut(false);
       return;
     }
 
-    clearCart();
-    router.push(`/dashboard/buyer?order=${data.orderId}`);
+    if (!data.authorizationUrl) {
+      const message = "Payment could not be started.";
+      setError(message);
+      toast.error(message);
+      setIsCheckingOut(false);
+      return;
+    }
+
+    window.location.href = data.authorizationUrl;
   }
 
   if (!isHydrated) {
@@ -194,16 +201,16 @@ export default function CartPage() {
           />
         </label>
         <p className="mt-4 text-sm text-muted-foreground">
-          No online payment yet. Seller will confirm your order.
+          Pay securely with Paystack using card or Mobile Money (Ghana).
         </p>
         {error && <p className="mt-4 text-sm text-destructive">{error}</p>}
         <Button
           className="mt-5 h-11 w-full"
           type="button"
-          disabled={isCheckingOut}
+          disabled={isCheckingOut || shippingAddress.trim().length < 8}
           onClick={checkout}
         >
-          {isCheckingOut ? "Placing order..." : "Place order"}
+          {isCheckingOut ? "Redirecting to Paystack..." : "Pay with Paystack"}
         </Button>
         <Button
           className="mt-3 h-11 w-full"

@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { X } from "lucide-react";
 
 import { expertLinks, isNavLinkActive } from "../nav-links";
+import Logo from "../shared/logo";
 
 export const EXPERT_NAV_OPEN_EVENT = "expert-nav-open";
 
@@ -51,7 +52,7 @@ export default function ExpertMobileDrawer() {
       <aside className="absolute left-0 top-0 flex h-full w-[min(100%,280px)] flex-col bg-background shadow-xl">
         <div className="flex items-center justify-between border-b p-4">
           <div>
-            <p className="font-semibold text-primary">Green Market</p>
+            <Logo textClassName="inline font-semibold text-primary" />
             <p className="text-xs text-muted-foreground">Expert Dashboard</p>
           </div>
           <button

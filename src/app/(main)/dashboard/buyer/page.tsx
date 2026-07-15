@@ -18,20 +18,12 @@ export default async function BuyerDashboard() {
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-10">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div>
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Buyer Dashboard</h1>
           <p className="text-muted-foreground">
             Track orders and consultation requests from Green Market.
           </p>
-        </div>
-        <div className="flex flex-wrap gap-3">
-          <Button asChild variant="outline">
-            <Link href="/experts">Browse experts</Link>
-          </Button>
-          <Button asChild>
-            <Link href="/marketplace">Browse marketplace</Link>
-          </Button>
         </div>
       </div>
 

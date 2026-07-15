@@ -118,6 +118,11 @@ export const sellerLinks: NavigationLink[] = [
     href: "/dashboard/seller/requests",
     icon: MessageSquare,
   },
+  {
+    label: "Analytics",
+    href: "/dashboard/admin/analytics",
+    icon: BarChart3,
+  },
 ]
 
 export const expertLinks: NavigationLink[] = [

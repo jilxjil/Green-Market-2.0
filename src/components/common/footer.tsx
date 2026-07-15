@@ -1,6 +1,8 @@
 "use client"
 import Link from "next/link";
 
+import Logo from "@/components/navigation/shared/logo";
+
 
 
 export default function Footer(){
@@ -18,18 +20,10 @@ export default function Footer(){
 
           {/* Brand */}
           <div>
-            <div className="mb-4 flex items-center gap-2">
-              <div
-                className="
-                  flex h-9 w-9 items-center justify-center
-                  rounded-full bg-white
-                  text-sm font-bold text-gray-900
-                "
-              >
-                G
-              </div>
-              <span className="font-semibold tracking-tight">Green Market</span>
-            </div>
+            <Logo
+              markClassName="h-9 w-9"
+              textClassName="inline font-semibold tracking-tight text-white"
+            />
             <p className="mt-6 text-sm text-gray-400">+233 20 600 3234</p>
             <p className="text-sm text-gray-400">info@greenmarket.com</p>
           </div>

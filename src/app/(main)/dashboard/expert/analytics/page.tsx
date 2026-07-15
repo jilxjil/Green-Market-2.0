@@ -4,6 +4,9 @@ import { desc, eq } from "drizzle-orm";
 import { db } from "@/db";
 import { consultationRequests, expertServices } from "@/db/schema";
 import { requireRole } from "@/lib/auth/require-role";
+import { buildDailySeries, parseAnalyticsRange, rangeStart } from "@/lib/analytics";
+import { BarSeries } from "@/components/analytics/bar-series";
+import { RangeTabs } from "@/components/analytics/range-tabs";
 
 function formatCurrency(value: number) {
   return `GH₵ ${value.toLocaleString(undefined, {
@@ -12,8 +15,9 @@ function formatCurrency(value: number) {
   })}`;
 }
 
-export default async function ExpertAnalyticsPage() {
+export default async function ExpertAnalyticsPage({ searchParams }: { searchParams: Promise<{ days?: string }> }) {
   const { user } = await requireRole("expert");
+  const days = parseAnalyticsRange((await searchParams).days);
 
   const requestRows = await db
     .select({
@@ -30,12 +34,13 @@ export default async function ExpertAnalyticsPage() {
     .where(eq(expertServices.expertUserId, user.id))
     .orderBy(desc(consultationRequests.createdAt));
 
-  const totalRequests = requestRows.length;
-  const scheduledRequests = requestRows.filter((row) => row.status === "scheduled").length;
-  const completedRequests = requestRows.filter((row) => row.status === "completed").length;
+  const filteredRows = requestRows.filter((row) => row.createdAt >= rangeStart(days));
+  const totalRequests = filteredRows.length;
+  const scheduledRequests = filteredRows.filter((row) => row.status === "scheduled").length;
+  const completedRequests = filteredRows.filter((row) => row.status === "completed").length;
   const completionRate =
     totalRequests > 0 ? Math.round((completedRequests / totalRequests) * 100) : 0;
-  const completedRevenue = requestRows
+  const completedRevenue = filteredRows
     .filter((row) => row.status === "completed")
     .reduce((sum, row) => sum + row.servicePrice, 0);
 
@@ -44,7 +49,7 @@ export default async function ExpertAnalyticsPage() {
     { title: string; requests: number; completed: number; revenue: number }
   >();
 
-  for (const row of requestRows) {
+  for (const row of filteredRows) {
     const current =
       serviceStats.get(row.serviceId) ?? {
         title: row.serviceTitle,
@@ -64,6 +69,7 @@ export default async function ExpertAnalyticsPage() {
     .sort((a, b) => b.requests - a.requests)
     .slice(0, 6);
   const maxRequests = Math.max(...services.map((service) => service.requests), 1);
+  const requestSeries = buildDailySeries(filteredRows, days, (row) => row.createdAt, () => 1);
 
   return (
     <div className="mx-auto w-full max-w-6xl space-y-6">
@@ -84,6 +90,8 @@ export default async function ExpertAnalyticsPage() {
         </Link>
       </div>
 
+      <RangeTabs active={days} />
+
       <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-lg border bg-card p-5">
           <p className="text-sm text-muted-foreground">Requests</p>
@@ -102,6 +110,8 @@ export default async function ExpertAnalyticsPage() {
           <p className="mt-2 text-2xl font-bold">{formatCurrency(completedRevenue)}</p>
         </div>
       </section>
+
+      <section className="rounded-lg border bg-card p-5"><h2 className="text-lg font-semibold">Requests over time</h2><BarSeries data={requestSeries} valueLabel={(value) => `${value} request${value === 1 ? "" : "s"}`} /></section>
 
       <section className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
         <div className="rounded-lg border bg-card p-5">

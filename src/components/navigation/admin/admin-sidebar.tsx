@@ -4,6 +4,7 @@ import Link from "next/link"
 import { usePathname } from "next/navigation"
 
 import { adminLinks, isNavLinkActive } from "../nav-links"
+import Logo from "../shared/logo"
 
 export default function AdminSidebar() {
   const pathname = usePathname()
@@ -11,7 +12,7 @@ export default function AdminSidebar() {
   return (
     <aside className="hidden md:flex h-screen w-64 flex-col border-r bg-white">
       <div className="border-b p-6">
-        <h2 className="text-xl text-primary font-alan font bold">Green Market</h2>
+        <Logo textClassName="inline text-xl text-primary font-alan" />
         <p className="text-sm text-muted-foreground">Admin Dashboard</p>
       </div>
 
@@ -39,4 +40,3 @@ export default function AdminSidebar() {
     </aside>
   )
 }
-

@@ -1,6 +1,6 @@
 ---
 name: Remaining Features Roadmap
-overview: "Phased roadmap for everything still missing after the current build: finish PRD MVP gaps (buyer profile, storefront, account UX, order actions), add operational tooling (admin, notifications), harden the app (auth polish, tests, cleanup), then post-MVP features (chat, logistics, analytics) with payments deferred per your choice."
+overview: "Phased roadmap: finish MVP ops gaps, expert meetings, then growth features — Paystack payments, analytics v2, AI chatbot (support + ag advisory). Analytics dashboards and human messaging already exist."
 todos:
   - id: phase1-buyer
     content: "Phase 1: Buyer profile API/page, buyer layout + mobile nav, account page + user menu sign-out"
@@ -20,8 +20,17 @@ todos:
   - id: phase2-meetings
     content: "Phase 2.8: Expert consultation meetings — manual Meet/Zoom links, schedule UI, join page for both parties"
     status: pending
+  - id: phase5-paystack
+    content: "Phase 5A: Paystack — marketplace checkout + consultation fees, webhooks, paid order status"
+    status: pending
+  - id: phase5-analytics
+    content: "Phase 5B: Analytics v2 — time-series charts, admin metrics, exports (extend existing seller/expert pages)"
+    status: pending
+  - id: phase5-chatbot
+    content: "Phase 5C: AI chatbot — support widget first, then ag advisory; separate from human /dashboard/messages"
+    status: pending
   - id: phase3-postmvp
-    content: "Phase 3: Logistics, messaging, reviews (payments epic separate)"
+    content: "Phase 3: Logistics, reviews polish (messaging largely done)"
     status: pending
   - id: phase4-quality
     content: "Phase 4: Vitest + Playwright + CI, pagination and indexes"
@@ -31,9 +40,44 @@ isProject: false
 
 # Remaining Features Roadmap — Green Market
 
-## Current state (baseline)
+## Current state (updated)
 
-Core marketplace loop is **working**: auth, role onboarding, marketplace browse/search/filter, cart, orders with stock decrement, seller product CRUD + profile + orders, expert services + consultation requests + public `/experts`, Supabase/local image uploads, mobile seller/expert nav.
+**Already built (beyond original plan baseline):**
+
+| Area | Status | Evidence |
+|------|--------|----------|
+| Seller analytics | Basic dashboards live | [`dashboard/seller/analytics/page.tsx`](src/app/(main)/dashboard/seller/analytics/page.tsx) — revenue, top products, reviews |
+| Expert analytics | Basic dashboards live | [`dashboard/expert/analytics/page.tsx`](src/app/(main)/dashboard/expert/analytics/page.tsx) — requests, completion rate, service demand |
+| Human messaging | P2P chat (not AI) | [`dashboard/messages`](src/app/(main)/dashboard/messages/page.tsx), [`lib/conversations.ts`](src/lib/conversations.ts) |
+| Buyer profile, admin, reviews | Partially implemented | `dashboard/buyer/profile`, `dashboard/admin/*`, `lib/reviews.ts` |
+| Expert meeting links | Likely in progress | `validations/consultation-meeting.ts`, `dashboard/expert/requests/[requestId]` |
+
+**Still missing for your priorities:**
+
+| Priority | Gap |
+|----------|-----|
+| **Payments** | Cart says “No online payment yet”; no Paystack, no `paid` status, no webhooks |
+| **Analytics** | No time-series charts, no admin platform metrics, no date filters/export |
+| **Chatbot** | Landing page promises “AI-chatbot assistants” ([`(auth)/page.tsx`](src/app/(auth)/page.tsx)) — **zero implementation**; separate from human messages |
+
+**Payments note:** Previously deferred; now planned as **Paystack** (Ghana cards + Mobile Money).
+
+```mermaid
+flowchart TB
+  subgraph done [Done]
+    Market[Marketplace + cart]
+    AnalyticsBasic[Seller + expert analytics]
+    Messages[Human messaging]
+  end
+  subgraph yourNext [Your next priorities]
+    Paystack[Paystack payments]
+    AnalyticsV2[Analytics v2]
+    Chatbot[AI chatbot]
+  end
+  Market --> Paystack
+  AnalyticsBasic --> AnalyticsV2
+  Messages -.->|different product| Chatbot
+```
 
 ```mermaid
 flowchart LR
@@ -378,7 +422,114 @@ gantt
 **Sprint 2 (Week 2):** Phase 1.6–1.8 + Phase 2.1–2.3 — onboarding, admin, notifications  
 **Sprint 2b (Week 2–3):** **Phase 2.8** — consultation meeting links, schedule UI, requester join page (after notifications so schedule events notify)  
 **Sprint 3 (Week 3):** Phase 2.4–2.7 + Phase 4 baseline — email reminders for meetings, toasts, tests, cleanup  
-**Sprint 4+:** Phase 3 logistics → chat → reviews; payments epic when ready  
+**Sprint 4+:** Phase 3 logistics; **Phase 5 growth (your focus): Paystack → Analytics v2 → AI chatbot**
+
+---
+
+## Phase 5 — Growth features (your priorities)
+
+Recommended order: **Paystack first** (unblocks real revenue), then **Analytics v2** (measure Paystack impact), then **AI chatbot** (support, then ag advisory).
+
+### 5A — Paystack payment integration (highest priority)
+
+**Why first:** Cart and expert flows are manual today; Paystack fits Ghana (Mobile Money + cards).
+
+**Scope — marketplace orders:**
+
+1. **Schema:** `payments` table — `orderId`, `paystackReference`, `amount`, `currency`, `status` (`pending`/`success`/`failed`), `channel`, `paidAt`
+2. **Extend orders:** `paymentStatus` (`unpaid` | `paid` | `refunded`); only create seller-facing order after payment success OR keep pending until webhook confirms
+3. **API:**
+   - `POST /api/payments/initialize` — buyer cart total → Paystack Initialize Transaction (amount in pesewas)
+   - `POST /api/payments/webhook` — verify Paystack signature, idempotent update
+   - `GET /api/payments/verify?reference=` — client redirect callback after Paystack checkout
+4. **UI:** Replace cart disclaimer in [`cart/page.tsx`](src/app/(main)/cart/page.tsx) with “Pay with Paystack”; mobile-full-width pay button
+5. **Env:** `PAYSTACK_SECRET_KEY`, `NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY`, webhook URL in Paystack dashboard
+
+**Scope — expert consultations (phase 5A.2):**
+
+- Pay before request submitted OR pay when expert accepts (pick one — recommend **pay on accept** to reduce refunds)
+- Link `consultation_requests.paymentId` optional FK
+
+**Security:** Webhook signature verification; never trust client-only success; server creates order only after verified payment.
+
+**Files:** `lib/paystack.ts`, `api/payments/*`, `db/schema/payments.ts`, cart checkout flow refactor
+
+---
+
+### 5B — Analytics v2 (extend what exists)
+
+**Why second:** [`seller/analytics`](src/app/(main)/dashboard/seller/analytics/page.tsx) and [`expert/analytics`](src/app/(main)/dashboard/expert/analytics/page.tsx) already show KPI cards and bar-style rankings — next step is **time, filters, and platform view**.
+
+**Seller analytics enhancements:**
+
+- Date range filter (7d / 30d / 90d / custom)
+- Revenue over time chart (daily/weekly) — use lightweight chart lib (Recharts already common in Next stacks) or CSS sparklines first
+- Orders by status breakdown
+- Export CSV for top products / revenue
+
+**Expert analytics enhancements:**
+
+- Requests over time, completion funnel (pending → scheduled → completed)
+- Revenue from **paid** consultations once Paystack live (not just `completed` status proxy)
+
+**Admin analytics (new):** `/dashboard/admin/analytics`
+
+- Total GMV, orders, users by role, top sellers, consultation volume
+- Requires admin role (Phase 2.2)
+
+**Buyer analytics (optional):** spend summary on buyer dashboard
+
+**Mobile:** stack charts vertically; horizontal scroll for date tabs
+
+---
+
+### 5C — AI chatbot (support first, then ag advisory)
+
+**Important:** This is **not** the existing human chat at [`/dashboard/messages`](src/app/(main)/dashboard/messages/page.tsx). The chatbot is a **separate AI layer** promised on the landing page.
+
+**Phase 5C.1 — Support chatbot (build first)**
+
+- Floating widget on public pages: marketplace, cart, experts, landing
+- Powered by OpenAI / Anthropic API (server-side only — `OPENAI_API_KEY` in env)
+- **RAG-lite:** system prompt + static FAQ markdown (shipping, roles, how to order, consultation flow)
+- **Tools (optional):** fetch user’s order status if logged in (read-only API)
+- Routes: `POST /api/chat` with rate limiting per IP/user
+- UI: [`components/chat/support-chat-widget.tsx`](src/components/chat/support-chat-widget.tsx) — mobile bottom sheet, desktop panel
+
+**Phase 5C.2 — Ag advisory chatbot**
+
+- Separate mode or `/advisor` page: crop/soil/market questions
+- System prompt: Ghana agriculture context, disclaimers (“not a substitute for certified expert”)
+- CTA: “Book an expert” → link to [`/experts`](src/app/(main)/experts/page.tsx)
+- Do **not** give medical/pesticide dosage advice without strong guardrails
+- Optional: log conversations for expert referral analytics
+
+**Out of scope for v1 chatbot:** voice, WhatsApp integration, fine-tuned models
+
+```mermaid
+flowchart LR
+  User --> SupportBot[Support chatbot]
+  User --> AgBot[Ag advisory bot]
+  SupportBot --> FAQ[Static FAQ + auth order lookup]
+  AgBot --> ExpertsLink[Link to /experts]
+  HumanChat[/dashboard/messages] --> P2P[Seller buyer expert P2P]
+```
+
+---
+
+## Recommended order for you
+
+| Order | Feature | Effort | User impact |
+|-------|---------|--------|-------------|
+| **1** | **Paystack (marketplace checkout)** | 1–2 weeks | High — real transactions |
+| **2** | **Paystack (consultations)** | 3–5 days | Medium — monetize experts |
+| **3** | **Analytics v2** | 1 week | Medium — sellers/experts + admin insights |
+| **4** | **Support chatbot** | 1 week | Medium — matches landing page promise |
+| **5** | **Ag advisory chatbot** | 1 week | Medium — differentiation vs generic marketplaces |
+
+**Before Paystack:** finish **Phase 2.8 expert meetings** if consultation scheduling still lacks meeting links — paid consultations need a clear schedule + join flow.
+
+**Parallel (low conflict):** Analytics v2 date filters can start while Paystack webhooks are in test mode.
 
 ---
 
@@ -399,9 +550,10 @@ gantt
 
 ## Out of scope for this roadmap
 
-- Payment gateway integration (deferred)
 - Native mobile app
-- AI / blockchain features
+- Blockchain traceability
 - Crowdfunding, auctions
+- Embedded video meetings (manual links only in Phase 2.8)
+- WhatsApp Business API for chatbot v1
 
-When you are ready to implement, start with **Phase 1.1–1.5** in Agent mode — highest user-visible impact with lowest schema risk.
+When you are ready to implement your three priorities, start with **Phase 5A Paystack marketplace checkout** in Agent mode.
